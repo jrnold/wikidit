@@ -20,4 +20,7 @@ RUN conda install -y \
         revscoring \
         mwapi
 
+# Download stopwords
+RUN python -c "import nltk;nltk.download('stopwords')"
+
 WORKDIR /home/jovyan/work
