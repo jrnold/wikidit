@@ -19,3 +19,5 @@ RUN conda install -y \
         articlequality \
         revscoring \
         mwapi
+
+WORKDIR /home/jovyan/work
