@@ -1,0 +1,7 @@
+name: wikiedits
+dependencies:
+- python=3.6
+- pip:
+  - mwparserfromhell
+  - mwrevert
+  - ores
