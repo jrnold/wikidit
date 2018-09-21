@@ -1,24 +1,14 @@
+# Install
+
+I try to have everything runnable through Docker.
+
+To build the docker image
 ```
-docker build --tag wikiedits .
+docker-compose build
+docker-compose up
 ```
 
-```
-docker run --rm -p 8888:8888 -v "$PWD":/home/jovyan/work jupyter/datascience-notebook:latest
-```
+# Prerequisites
 
-{{citation needed}}
-
-Alternative stuff
-
-- {{Clarify}}, {{Clarification needed}}, {{Clarify me}}, {{Confusing-inline}},
-  {{Confusing-short}}, {{Define?}} {{How?}} {{Huh}} {{What?}}, {{What}}
-- {{Explain}}
-- {{Confusing}}
-- {{Examples}}
-- {{Why}}
-
-If article is under-referenced
-
-- `{{Unreferenced}}`
-- `{{Refimprove}}`
-- `{{Unreferenced section}}`
+The file `data/labelled-*.ndjson.gz` includes 30000+ revisions with the full text
+in new-line delimited JSON.
