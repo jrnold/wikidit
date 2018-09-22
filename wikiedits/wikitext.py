@@ -22,6 +22,9 @@ def wiki2plaintext(parser, content):
     def is_bad_template(obj):
         return obj.name.lower() in bad_template_names
 
+    def is_bad_section(obj):
+        return obj.
+
     texts = []
     # strip out references, tables, and file/image links
     # then concatenate the stripped text of each section
