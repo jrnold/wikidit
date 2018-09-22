@@ -24,7 +24,7 @@ RUN conda install -y \
 RUN python -c "import nltk;nltk.download('stopwords')"
 
 # Add Spacy and models
-conda install -c conda-forge spacy && \
+RUN conda install -c conda-forge spacy && \
     python -m spacy download en && \
     python -m spacy download en_core_web_md && \
     python -m spacy download en_core_web_lg && \
