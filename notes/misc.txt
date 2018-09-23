@@ -1,0 +1,41 @@
+
+Problem statement:  Provide actionable advice for Wikipedia editors to improve articles.
+
+What is Wikipedia? Collaboratively edited Encyclopedia
+
+
+Why hasn't this been done yet?
+
+- ORES (since 2014) has a predictive model
+- Academic papers that provide black box models
+
+Method
+
+-  Data:
+
+  - Current, articles only (~ 5 million articles)
+  - All revisions (150 GB compressed)
+
+-  Method
+
+  - Balanced sample of ~ 30,000 articles for 6 quality classes
+  - Outcomes: 6 categories of quality (FA, GA, B, C, Start, Stub)
+  - Train classifier (Logistic, Random Forest, XGBoost)
+
+- Interpretability
+
+  - Local derivative
+  - Effect of different within-article changes
+  - Inverted regression: probability features given class
+
+Next steps
+
+-   Complete and polish interpretability portion
+-   Train language model on sentences tagged POV, citation needed, weasel words
+
+Prediction methods: Estimate the article quality given observed features
+
+Actual task: What is the quality of the model after making a revision?
+
+  - $E(y_i | x_i)$
+  - $E(y_i | x_i + change x_i) - E(y_i | x_i)$

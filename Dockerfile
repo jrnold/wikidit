@@ -14,11 +14,14 @@ RUN conda install -y \
         numpy \
         pycodestyle \
         tqdm \
-        tabulate && \
+        tabulate \
+        lxml && \
     pip install \
         articlequality \
         revscoring \
-        mwapi
+        mwapi \
+        cssselect \
+        yarl
 
 # Download stopwords
 RUN python -c "import nltk;nltk.download('stopwords')"
