@@ -23,6 +23,7 @@ RUN conda install -y \
         mwapi \
         revscoring \
         sklearn-pandas \
+        sqlalchemy_utils \
         yarl
 
 # Download stopwords
