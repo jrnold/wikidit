@@ -11,6 +11,7 @@ RUN conda install -y \
         flake8 \
         flask \
         docopt \
+        joblib \
         numpy \
         pycodestyle \
         tqdm \
@@ -18,9 +19,10 @@ RUN conda install -y \
         lxml && \
     pip install \
         articlequality \
-        revscoring \
-        mwapi \
         cssselect \
+        mwapi \
+        revscoring \
+        sklearn-pandas \
         yarl
 
 # Download stopwords

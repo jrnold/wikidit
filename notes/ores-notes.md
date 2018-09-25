@@ -42,7 +42,6 @@ Other features
 -  num headings / article length
 -  has infobox
 -  num templates
--  num categories
 -  tenuretime(t, i) = t - t(reg, i)
 -  tenure edits(t, i) = log(nedits(i, now) * t / (t(now) - t(reg, i))
 -  tenure(t, i) = tenuretime(t, i) = tenureedits(t, i)
