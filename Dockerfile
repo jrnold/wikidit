@@ -13,7 +13,7 @@ RUN conda install -y \
         docopt \
         joblib \
         numpy \
-        psycopg \
+        psycopg n\
         pycodestyle \
         tqdm \
         tabulate \
