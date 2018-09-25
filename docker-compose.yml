@@ -9,5 +9,7 @@ services:
   db:
     image: postgres
     restart: always
+    volumes:
+    - ./postgres-data:/var/lib/postgresql/data
     environment:
       POSTGRES_PASSWORD: password12345
