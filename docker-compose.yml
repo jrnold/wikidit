@@ -6,3 +6,8 @@ services:
     - "8888:8888"
     volumes:
     - ".:/home/jovyan/work/"
+  db:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: password12345
