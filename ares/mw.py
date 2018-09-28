@@ -5,6 +5,7 @@ from typing import Generator, Optional
 
 from mwxml import Dump, Revision
 import mwparserfromhell as mwparser
+import mwapi
 from mwparserfromhell.wikicode import Wikicode, Wikilink, Template
 
 
