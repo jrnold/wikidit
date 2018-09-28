@@ -32,12 +32,14 @@ def run(input_file, output_file, workers=1, n=None):
     df = df.set_index('revid')
     df.to_csv(output_file, index=True, compression="gzip")
 
+
 def main():
-    output_file = "../data/enwiki.labeling_revisions.w_features.nettrom_30k.csv.gz"
-    input_file = "../data/enwiki.labeling_revisions.w_text.nettrom_30k.ndjson.gz"
+    output_file = "./data/enwiki.labeling_revisions.w_features.nettrom_30k.csv.gz"
+    input_file = "./data/enwiki.labeling_revisions.w_text.nettrom_30k.ndjson.gz"
     workers = cpu_count() - 1
     n = None
     run(input_file, output_file, workers=workers, n=n)
+
 
 if __name__ == "__main__":
     main()

@@ -123,3 +123,52 @@ def featurize(content: str) -> dict:
     revision['text'] = plaintext
 
     return revision
+
+
+class WikiPage:
+    """Class to represent a Wikipedia page for use in models.
+    
+    This handles transforming the text of the page into features,
+    and 
+    
+    """
+    count_variables = (("words", 50),
+             ("headings", 1),
+             ("sub_headings", 1),
+             ("images", 1),
+             ("categories", 1),
+             ("wikilinks", 1),
+             ("cite_templates", 1),
+             ("citation_needed", -1),
+             ("who_templates", -1),
+             ("smartlists", 1),
+             ("ref", 1),
+             ("coordinates", 1))
+
+    binary_variables = (("coordinates", 1), ("infobox", 1))
+    
+    def __init__(self, content: str):
+        self.data = pd.DataFrame.from_records([featurize(content)])
+        
+    def add_count(self, variable, value):
+        """Add value to count number to ensure that it is not greater than """
+        df = self.data.copy()
+        df[variable] = df[variable] + value
+        df.loc[df[variable] < 0] = 0
+        return df
+    
+    def set_value(self, variable, value):
+        """Set all values of a column to the same value"""
+        df = self.data.copy()
+        df[variable] = value
+        return df
+    
+    def edits(self):
+        for x in count_variables:
+            yield (x, page.add_count(*x))
+        for x in binary_variables:
+            yield (x, page.set_value(*x))
+
+def sort_wp10(x, classes):
+    classes = list(classes)
+    return sorted(list(zip(classes, x)), key=lambda x: WP10_LABELS.index(x[0]))

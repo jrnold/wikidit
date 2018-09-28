@@ -78,3 +78,16 @@ def match_template(x, pattern: str) -> bool:
 def wikilink_title_matches(pattern: str, link: str) -> bool:
     """Does wikilink title match ``pattern``"""
     return bool(re.match(pattern, str(link.title), re.I))
+
+
+def get_page(session: mwapi.Session, title: str) -> dict:
+    """Get content of a Wikipedia page."""
+    params = {'action': 'query', 'titles': title, 'prop': "revisions",
+              'rvprop': 'ids|content', "rvslots": "main"}
+    r = session.get(**params)
+    page = list(r['query']['pages'].values())[0]
+    rev = page['revisions'][0]
+    rev['content'] = rev['slots']['main']['*']
+    del rev['slots']
+    return rev
+    

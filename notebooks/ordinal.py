@@ -31,7 +31,7 @@ def _parallel_fit_estimator(estimator, X, y, sample_weight=None):
     return estimator
 
 
-class OrdinalClassifier(_BaseComposition, ClassifierMixin, TransformerMixin):
+class Ordinallassifier(_BaseComposition, ClassifierMixin, TransformerMixin):
     """Soft/Hard classifier for unfitted estimators of ordered categories."""
 
     def __init__(self, estimator, voting='hard', weights=None, n_jobs=None,
