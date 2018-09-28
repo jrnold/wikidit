@@ -2,6 +2,7 @@ import re
 
 import mwparserfromhell as mwparser
 import mwapi
+import pandas as pd
 from .mw import match_template
 
 def featurize(content: str) -> dict:
