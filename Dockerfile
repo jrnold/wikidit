@@ -12,12 +12,13 @@ RUN conda install -y \
         flask \
         docopt \
         joblib \
+        lxml \
         numpy \
+        plotly \
         psycopg2 \
         pycodestyle \
         tqdm \
-        tabulate \
-        lxml && \
+        tabulate && \
     pip install \
         articlequality \
         cssselect \
@@ -26,6 +27,8 @@ RUN conda install -y \
         sklearn-pandas \
         sqlalchemy_utils \
         yarl
+        
+RUN conda install -c conda-forge xgboost
 
 # Download stopwords
 RUN python -c "import nltk;nltk.download('stopwords')"

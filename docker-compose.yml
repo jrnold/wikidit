@@ -6,12 +6,6 @@ services:
     - "8888:8888"
     volumes:
     - ".:/home/jovyan/work/"
-  db:
-    image: postgres
-    restart: always
-    volumes:
-    - pgdata:/var/lib/postgresql/data    
     environment:
-    - POSTGRES_PASSWORD: password12345
-volumes:
-  pgdata:
+      JUPYTER_LAB_ENABLE: "yes"
+    command: ["start.sh", "jupyter", "lab"]
