@@ -167,9 +167,9 @@ class WikiPage:
     
     def edits(self):
         for x in self.count_variables:
-            yield (x, page.add_count(*x))
+            yield (x, self.add_count(*x))
         for x in self.binary_variables:
-            yield (x, page.set_value(*x))
+            yield (x, self.set_value(*x))
 
 WP10_LABELS = ("Stub", "Start", "C", "B", "A", "GA", "FA")
 """Wikipeda WP10 Quality labels"""
