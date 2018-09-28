@@ -1,6 +1,7 @@
 import re
 
 import mwparserfromhell as mwparser
+import mwapi
 from .mw import match_template
 
 def featurize(content: str) -> dict:
