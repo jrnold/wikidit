@@ -166,9 +166,9 @@ class WikiPage:
         return df
     
     def edits(self):
-        for x in count_variables:
+        for x in self.count_variables:
             yield (x, page.add_count(*x))
-        for x in binary_variables:
+        for x in self.binary_variables:
             yield (x, page.set_value(*x))
 
 WP10_LABELS = ("Stub", "Start", "C", "B", "A", "GA", "FA")
