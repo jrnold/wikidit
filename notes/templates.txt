@@ -1,0 +1,67 @@
+Inline with other
+
+
+Attribution
+
+- According to whom
+- Attribution needed
+- By whom
+- From whom?
+- Like whom?
+- To whom?
+- Who
+
+Clarify
+
+- Ambiguous
+- Clarify
+- Clarify span
+- Clarify timeframe
+- Context inline
+- Incomprehensible inline
+
+Precision inline
+
+- By how much
+- Definition
+- Definition needed
+- Explain
+- Example needed
+- How
+- How often
+- Quantify
+- Specify
+- Vague
+- When
+- Where
+- Which
+- Who else
+- Why
+- Year needed
+
+Neutrality inline
+
+- Buzzword inline
+- Lopside
+- Peacock term
+- POV statement
+- Weasel inline
+- Weasel word some span
+
+Verifiability/Dubious
+
+- Disputed inline
+- Dubious
+- Dubious span
+
+Verifiability/Missing or problematic reference
+
+- Citation needed
+- Citation needed span
+
+Wording
+
+- Awkward
+- Copy edit inline
+- Buzzword inline
+- Technical statement
