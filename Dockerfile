@@ -7,37 +7,22 @@ RUN apt-get update && \
         hunspell
 
 USER jovyan
-RUN conda install -y \
-        flake8 \
+# RUN conda update --all
+RUN conda install -c conda-forge -y \
         flask \
-        docopt \
-        joblib \
+        gunicorn \
         lxml \
-        numpy \
         plotly \
-        psycopg2 \
-        pycodestyle \
+        scikit-learn>=0.20 \
         tqdm \
-        tabulate && \
-    pip install \
-        articlequality \
-        cssselect \
-        mwapi \
-        revscoring \
-        sklearn-pandas \
-        sqlalchemy_utils \
-        yarl
-        
-RUN conda install -c conda-forge xgboost
+        xgboost
 
-# Download stopwords
-RUN python -c "import nltk;nltk.download('stopwords')"
-
-# Add Spacy and models
-RUN conda install -c conda-forge spacy && \
-    python -m spacy download en && \
-    python -m spacy download en_core_web_md && \
-    python -m spacy download en_core_web_lg && \
-    python -m spacy download en_vectors_web_lg
+RUN pip install \
+    cssselect \
+    mwapi \
+    mwparserfromhell \
+    mwxml \
+    sklearn-pandas \
+    yarl
 
 WORKDIR /home/jovyan/work

@@ -1,0 +1,16 @@
+{% extends "layout.html" %}
+{% block title %}ARES - {{title}}{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="row">
+    <p>
+      There is no <a href="https://en.wikipedia.org/">English Wikipedia</a>
+      page <strong>{{ title }}</strong>.
+
+      Try searching for another article.
+
+      {% include "input.html" %}
+    </p>
+  </div>
+</div>
+{% endblock %}

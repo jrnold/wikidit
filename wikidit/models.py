@@ -171,7 +171,7 @@ class WikiPage:
         for x in self.binary_variables:
             yield (x, self.set_value(*x))
 
-WP10_LABELS = ("Stub", "Start", "C", "B", "A", "GA", "FA")
+WP10_LABELS = ("Stub", "Start", "C", "B", "GA", "FA")
 """Wikipeda WP10 Quality labels"""
  
 

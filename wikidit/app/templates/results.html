@@ -1,0 +1,50 @@
+{% extends "layout.html" %}
+{% block title %}ARES - {{title}}{% endblock %}
+{% block headscript %}
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+{% endblock %}
+{% block content %}
+<div class="container">
+  <h2><a href="{{ wikipedia_url }}">Quality report for article: {{ title }}</a></h2>
+  <div class="row">
+    <div class="col">
+      <h2>Quality</h2>
+      This article is estimated to be {{ best }} or {{ avg }} on a 1&ndash;6 scale.
+
+      {{ fig | safe }}
+
+      </div>
+    </div>
+    <div class="col">
+      <h2>Improvements</h2>
+      The editing actions which are most likely to have the largest effects
+      on article quality.
+
+      <table class="table">
+        <thead>
+          <tr>
+            <th>
+              Action
+            </th>
+            <th>
+              Predicted Change in Quality Assessment Score
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for x in interventions %}
+          <tr>
+            <td>
+              {{ x.name }}
+            </td>
+            <td>
+              {{ x.value }}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}
