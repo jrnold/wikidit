@@ -8,6 +8,8 @@ import mwparserfromhell as mwparser
 import mwapi
 from mwparserfromhell.wikicode import Wikicode, Wikilink, Template
 
+from sklearn_ordinal import OrdinalClassifier
+
 
 def iter_revisions(dump: Dump, max_pages: Optional[int]=None) -> Generator[Revision, None, None]:
     """Iterate over revisions of Wikipedia dump."""
@@ -91,4 +93,3 @@ def get_page(session: mwapi.Session, title: str) -> dict:
     rev['content'] = rev['slots']['main']['*']
     del rev['slots']
     return rev
-    

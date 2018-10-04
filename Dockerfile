@@ -23,6 +23,8 @@ RUN pip install \
     mwparserfromhell \
     mwxml \
     sklearn-pandas \
-    yarl
+    yarl \
+    git+https://github.com/jrnold/sklearn-ordinal.git
+
 
 WORKDIR /home/jovyan/work
