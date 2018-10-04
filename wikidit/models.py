@@ -5,6 +5,11 @@ import mwapi
 import pandas as pd
 from .mw import match_template
 
+import numpy as np
+import warnings
+
+
+
 def featurize(content: str) -> dict:
     """Create features for each revision
 
@@ -185,3 +190,11 @@ def load_wp10(input_file):
 def sort_wp10(x, classes):
     classes = list(classes)
     return sorted(list(zip(classes, x)), key=lambda x: WP10_LABELS.index(x[0]))
+
+def _parallel_fit_estimator(estimator, X, y, cat):
+    """Private function used to fit an estimator to a class within a job."""
+    touse = (y >= cat)
+    y_transformed = y[touse] > cat
+    estimator.fit(X[touse, :], y_transformed)
+    return estimator
+

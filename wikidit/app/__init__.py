@@ -18,7 +18,7 @@ _WIKI_HOST = "https://en.wikipedia.org"
 # This needs to be replaced by config
 MODEL_FILENAME = os.path.join(".", "models", "model.pkl")
 with open(MODEL_FILENAME, "rb") as f:
-    return dill.load(f)
+    MODEL = dill.load(f)
 
 app = Flask(__name__)
 
