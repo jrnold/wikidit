@@ -62,12 +62,12 @@ def featurize(content: str) -> dict:
     #             lead_paras = len(paras)
     # revision['total_paras'] = total_paras
     # revision['lead_paras'] = lead_paras
-    # revision['non_ref_paras'] = tnon_ref_paras 
+    # revision['non_ref_paras'] = tnon_ref_paras
     revision['words'] = word_count
     # revision['average_word_length'] = word_count / word_chars if word_count > 0 else 0
 
     ## Headings
-    
+
     # Total number of headings
     headings = text.filter_headings()
     revision['headings'] = len([x for x in headings if x.level == 2])
@@ -90,7 +90,7 @@ def featurize(content: str) -> dict:
 
     # external links
     revision['external_links'] = len(text.filter_external_links())
-    
+
     ## Templates
     templates = text.filter_templates()
 
@@ -110,12 +110,12 @@ def featurize(content: str) -> dict:
     revision['citation_needed'] = sum(match_template(x, "citation_needed|cn|fact") for x in templates)
 
     # other templates
-    special_templates = sum(revision[k] for k in 
+    special_templates = sum(revision[k] for k in
                             ("infoboxes", "cite_templates", "citation_needed",
                              "main_templates", "who_templates"))
 
     revision['other_templates'] = len(templates) - special_templates
-    
+
     # number of ref tags
     revision['ref'] = len([x for x in text.filter_tags() if x.tag == "ref"])
 
@@ -134,59 +134,59 @@ def featurize(content: str) -> dict:
 
 class WikiPage:
     """Class to represent a Wikipedia page for use in models.
-    
-    This handles transforming the text of the page into features,
-    and 
-    
-    """
-    count_variables = (("words", 50),
-             ("headings", 1),
-             ("sub_headings", 1),
-             ("images", 1),
-             ("categories", 1),
-             ("wikilinks", 1),
-             ("cite_templates", 1),
-             ("citation_needed", -1),
-             ("who_templates", -1),
-             ("smartlists", 1),
-             ("ref", 1),
-             ("coordinates", 1))
 
-    binary_variables = (("coordinates", 1), ("infobox", 1))
-    
+    This handles transforming the text of the page into features,
+    and
+
+    """
+    count_variables = (("words", 50, "Add one paragraph (50 words)"),
+             ("headings", 1, "Split content with a  heading"),
+             ("sub_headings", 1, "Split content with a subheading"),
+             ("images", 1, "Add an image"),
+             ("categories", 1, "Add a link to a category"),
+             ("wikilinks", 1, "Add a link to another wiki page"),
+             ("cite_templates", 1, "Add a citation"),
+             ("who_templates", -1, "Remove a Who? template"),
+             ("smartlists", 1, "Add a table"),
+             ("ref", 1, "Add a reference"))
+
+    binary_variables = (("coordinates", 1, "Add coordinates"),
+                        ("infobox", 1, "Add an infobox"))
+
     def __init__(self, content: str):
         self.data = pd.DataFrame.from_records([featurize(content)])
-        
+
     def add_count(self, variable, value):
         """Add value to count number to ensure that it is not greater than """
         df = self.data.copy()
         df[variable] = df[variable] + value
         df.loc[df[variable] < 0] = 0
         return df
-    
+
     def set_value(self, variable, value):
         """Set all values of a column to the same value"""
         df = self.data.copy()
         df[variable] = value
         return df
-    
+
     def edits(self):
         for x in self.count_variables:
-            yield (x, self.add_count(*x))
+            yield (x[2], self.add_count(*x[:2]))
         for x in self.binary_variables:
-            yield (x, self.set_value(*x))
+            yield (x[2], self.set_value(*x[:2]))
 
 WP10_LABELS = ("Stub", "Start", "C", "B", "GA", "FA")
 """Wikipeda WP10 Quality labels"""
- 
+
 
 def load_wp10(input_file):
     """Load wp10 data with features from a csv file"""
     revisions = pd.read_csv(input_file, index_col='revid')
     revisions['wp10'] = pd.Categorical(revisions['wp10'],
-                                    categories=WP10_LABELS, ordered=True)
+                                      categories=WP10_LABELS, ordered=True)
     return revisions
-    
+
+
 def sort_wp10(x, classes):
     classes = list(classes)
     return sorted(list(zip(classes, x)), key=lambda x: WP10_LABELS.index(x[0]))
