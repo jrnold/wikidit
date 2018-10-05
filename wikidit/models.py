@@ -10,7 +10,7 @@ import warnings
 
 
 
-def featurize(content: str) -> dict:
+def featurize(nlp, content):
     """Create features for each revision
 
     Parameters
@@ -39,7 +39,9 @@ def featurize(content: str) -> dict:
     ## Real Content
 
     # Sections
-    word_count = len(re.findall(PAT_WORD, plaintext))
+    parsed = nlp(plaintext)
+    words = [tok for tok in parsed if not (tok.is_space or tok.is_punct)]
+    word_count = len(words)
     # sections = text.get_sections(flat=True, include_lead=True, include_headings=False)
     # total_paras = 0
     # non_ref_paras = 0
