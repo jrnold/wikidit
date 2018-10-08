@@ -26,7 +26,7 @@ Lacking References:
   - No footnotes
   - More footnotes
 
-  Articles lacking reliable references:
+  Articles lacking reliable references
 
   - Circular
   - Primary sources
@@ -49,11 +49,7 @@ Lacking References:
 
   - Citation needed
 
-<<<<<<< HEAD
-Accuracy:
-=======
 Accuracy
->>>>>>> 815e25b5b20f3b4356e0407c694470259ccd8fc0
 
   Articles with broken or outdated citations:
 
@@ -64,9 +60,9 @@ Accuracy
   - Verify source
   - Nonspecific
 
-  Pages with missing references list: []
+  Pages with missing references list: null
 
-  Pages with broken reference names: []
+  Pages with broken reference names: null
 
   Accuracy disputes:
 
@@ -151,7 +147,7 @@ Links:
 
   - Dead link
 
-  Wikipedia external links cleanup:
+  Wikipedia external links cleanup
 
   - External links
 
@@ -171,7 +167,7 @@ Layout:
   - Expand section
   - Empty section
 
-  Articles to be merged:
+  Articles to be merged
 
   - Afd-merge from
   - Afd-merge to
@@ -218,16 +214,7 @@ Style:
   - Peacock
   - Peacock term
 
-  Articles with promotional tone:
-
-  - Advert
-  - Newsrelease
-  - Advert inline
-  - Promotion inline
-  - Fanpov
-  - Like resume
-
-  Articles with specifically marked weasel-worded phrases:
+  Articles with specifically marked weasel-worded phrases
 
   - WW
   - Weasel-inline
@@ -268,13 +255,22 @@ Style:
   - Travel guide
   - Verbosity
 
-File Description:
+  Articles with promotional tone:
+
+  - Advert
+  - Newsrelease
+  - Advert inline
+  - Promotion inline
+  - Fanpov
+  - Like resume
+
+File Description
 
   Copy to Wikimedia commons:
 
   - Copy to Wikimedia commons
 
-  Needs author: []
+  Needs author: {}
 
 File Quality:
 
@@ -299,42 +295,37 @@ File Quality:
 
   - Remove border
 
-Non-free file use:
-
-  Wikipedia non-free files with red backlink: []
+Non-free file use: {}
   # Wikipedia non-free files with red backlink:
   #
   # - Non-free use rationale
   # - Non-free use rationale 2
   # - Non-free media rationale
-  
+  # Publicity photographs with missing fair-use rationale: []
 
-File licensing:
-
-  Publicity photographs with missing fair-use rationale: []
+File licensing: {}
 
   Wikipedia files with disputed copyright information:
 
   - Wrong-license
   - dfu
 
-  Wikipedia license migration candidates: []
   # Wikipedia license migration candidates:
   #
   # - license migration announcement
   # - license migration
 
-Meta:
+Meta: {}
 
-  Biography articles without listas parameter: []
+  # Biography articles without listas parameter:
 
 Quality Content:
 
-  Featured article candidates: []
-  Featured article review: []
-  Featured list candidates: []
-  Good articles without an oldid: []
-  Good article nominations: []
+  Featured article candidates: {}
+  Featured article review: {}
+  Featured list candidates: {}
+  Good articles without an oldid: {}
+  Good article nominations: {}
 
 Other:
   Articles needing cleanup:

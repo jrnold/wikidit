@@ -12,32 +12,17 @@ import plotly.offline
 
 import pandas as pd
 
-from ..models import WikiPage, generate_predictions
-from ..mw import get_page
+from wikdit.models import 
 
-_USER_AGENT = "wikidit <jeffrey.arnold@gmail.com>"
-_WIKI_HOST = "https://en.wikipedia.org"
-
-
-# This needs to be replaced by config
-MODEL_FILENAME = os.path.join(".", "models", "model.pkl")
-with open(MODEL_FILENAME, "rb") as f:
-    MODEL = dill.load(f)
 
 app = Flask(__name__)
 
 # Create a single session instance to reuse
-wikiapi = mwapi.Session(host=_WIKI_HOST,
-                 user_agent=_USER_AGENT)
+wikiapi = mwapi.Session(host=_WIKI_HOST, user_agent=_USER_AGENT)
 
 @app.route('/')
 def index():
     return render_template("index.html")
-
-
-@app.route('/about')
-def about():
-    return render_template("about.html")
 
 
 @app.route('/page')

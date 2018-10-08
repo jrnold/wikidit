@@ -68,24 +68,45 @@ def make_edits(page):
             ]
     return edits
 
-def generate_predictions(model, page):
 
-    def get_probs(X):
-        return sort_wp10(list(model.predict_proba(X).squeeze()),
-                         list(model.classes_))
+def predict_page_edits_api(title, model, featurizer=Featurizer(), session=None):
+    if session is None:
+        session = Session()
+    page = get_page(session, title)
+    return predict_page_edits(featurizer, page['content'], model)
 
-    def get_wtavg(X):
-        x = [x[1] * (i + 1) for i, x in enumerate(get_probs(X))]
-        return sum(x)
 
-    best_prediction = model.predict(page.data)
-    pred_probs = get_probs(page.data)
-    wt_avg = get_wtavg(page.data)
-    interventions = {k: get_wtavg(v) - wt_avg
-                     for k, v in dict(page.edits()).items()}
+def predict_page_edits(featurizer, content, pipeline):
+    revision = featurizer.parse_content(content)
+    del revision['text']
+
+    revision = pd.DataFrame.from_records([revision])
+    probs = pipeline.predict_proba(revision)[0, :]
+    best_class = str(pipeline.predict(revision)[0])
+    
+    # If predicted to be FA - nothing else to do.
+    if best_class == "FA":
+        return {"predicted_class": best_class}
+    
+    # Create new pipeline for only that class
+    pipe2 = Pipeline([('mapper', pipeline.named_steps['mapper']),
+                      ('clf', pipeline.named_steps['clf'].named_estimators_[best_class])])
+
+    # Predicted probability for > current predicted class
+    prob_class = pipe2.predict_proba(revision)[0, 1]
+
+    # Calc new probabilities for all types of edits
+    edits = [(nm, pd.DataFrame.from_records([x])) 
+             for nm, x in make_edits(revision.to_dict('records')[0])]
+    new_probs = [(nm, pipe2.predict_proba(ed)[0, 1]) for nm, ed in edits]
+    change_prob = [(nm, p - prob_class) for nm, p in new_probs]
+    top_edits = sorted([(nm, p) for (nm, p) in change_prob if p > 0],
+                       key=lambda x: -x[1])
+    
     return {
-            'best': best_prediction[0],
-            'avg': wt_avg,
-            'proba': pred_probs,
-            'interventions': interventions
-            }
+        'predict': best_class,
+        'proba': probs,
+        'predicted_class_prob': prob_class,
+        'change_prob': change_prob,
+        'top_edits': top_edits
+    }
