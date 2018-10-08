@@ -7,15 +7,10 @@ import os.path
 import mwapi
 
 from ..utils import split_seq
+from ..mw import Session
 
 
-def main():
-    input_file = "../rawdata/enwiki.labeling_revisions.nettrom_30k.json"
-    output_file = "../data/enwiki.labeling_revisions.w_text.nettrom_30k.ndjson.gz"
-    user_agent = "<jeffrey.arnold@gmail.com>"
-    # maximum number of revisions that can be downloaded at once.
-    chunksize = 50
-
+def run(input_file, output_file, chunksize=50):
     # Possible rvprop
     # - ids: Get the revid and, from 1.16 onward, the parentid. 1.11+
     # - roles: List content slot roles that exist in the revision. 1.32+
@@ -32,7 +27,7 @@ def main():
     # - tags: Any tags for this revision, such as those added by AbuseFilter. 1.16+
     rvprop = 'content|comment|sha1|size|userid|user|timestamp|flags|ids'
 
-    session = mwapi.Session('https://en.wikipedia.org', user_agent=user_agent)
+    session = Session()
 
     with open(input_file, "r") as f:
         revisions = {
@@ -66,3 +61,15 @@ def main():
                     for k in ('pageid', 'ns', 'title'):
                         revision[k] = page[k]
                     f.write(json.dumps(revision) + "\n")
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("input")
+    parser.add_argument("output")
+    args = parser.parse_args()
+    run(args.input, args.output)
+
+
+if __name__ == "__main__":
+    main()

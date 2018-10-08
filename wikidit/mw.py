@@ -11,6 +11,15 @@ from mwparserfromhell.wikicode import Wikicode, Wikilink, Template
 from sklearn_ordinal import OrdinalClassifier
 
 
+class Session(mwapi.Session):
+    
+    _HOSTNAME = "https://en.wikipedia.org"
+    _USER_AGENT = "wikidit <jeffrey.arnold@gmail.com>"
+    
+    def __init__(self):
+        super().__init__(self._HOSTNAME, user_agent=self._USER_AGENT)
+
+
 def iter_revisions(dump: Dump, max_pages: Optional[int]=None) -> Generator[Revision, None, None]:
     """Iterate over revisions of Wikipedia dump."""
     for page in itertools.islice(dump.pages, max_pages):
@@ -83,13 +92,114 @@ def wikilink_title_matches(pattern: str, link: str) -> bool:
     return bool(re.match(pattern, str(link.title), re.I))
 
 
-def get_page(session: mwapi.Session, title: str) -> dict:
-    """Get content of a Wikipedia page."""
+def get_page(session, title):
+    if title is None or title == '':
+        return None
     params = {'action': 'query', 'titles': title, 'prop': "revisions",
-              'rvprop': 'ids|content', "rvslots": "main"}
-    r = session.get(**params)
+              'rvprop': 'ids|content|timestamp', "rvslots": "main"}
+    r = session.get(**params)    
     page = list(r['query']['pages'].values())[0]
+    # There is no such page!
+    if 'missing' in page:
+        return None
     rev = page['revisions'][0]
     rev['content'] = rev['slots']['main']['*']
     del rev['slots']
+    rev['title'] = page['title']
+    rev['pageid'] = page['pageid']
     return rev
+
+from wikidit.mw import Session
+import mwparserfromhell as mwparser
+
+
+def normalize_title(title, session=None):
+    if session is None:
+        session = Session()
+    result = session.get(action="query", titles=title, redirects=True)
+    page = list(result['query']['pages'].values())[0]
+    if 'missing' in page:
+        raise ValueError(f"Title {title} does not exist")
+    else:
+        return page['title']
+
+
+def get_talk_page(title, session=None):
+    if session is None:
+        session = Session()
+    norm_title = normalize_title(title, session=session)
+    result = session.get(action='query', titles=f"Talk:{norm_title}",
+                         prop='revisions', rvprop='content', 
+                         rvslots='main')
+    return list(result['query']['pages'].values())[0]
+
+
+def get_content(page):
+    return page['revisions'][0]['slots']['main']['*']
+
+
+def clean_wp_class(x):
+    replacements = {"disambig": "dab", 
+                    "current": "cur",
+                    "a": "ga",
+                    "bplus": "b",
+                    "none": None}
+
+    # See https://en.wikipedia.org/wiki/MediaWiki:Gadget-metadata.js
+    x = str(x).strip().lower()
+    if x in replacements:
+        x = replacements[x]
+    return x
+
+
+def clean_wp_importance(x):
+    x = str(x).strip().lower()
+    if x == "none":
+        return None
+    return x
+
+
+def parse_project(tmpl):
+    class_ = [x.value for x in tmpl.params if x.name == "class"]
+    class_ = None if not len(class_) else class_[0]
+    importance = [x.value for x in tmpl.params if x.name == "importance"]
+    importance = None if not len(importance) else importance[0]
+    return (str(tmpl.name), {'class': clean_wp_class(class_),
+                             'importance': clean_wp_class(importance)})
+
+
+def get_projects(page):
+    """Extract WikiProject templates from a page"""
+    return dict(parse_project(x) for x in page.filter_templates(matches="WikiProject"))
+
+
+def get_wikiprojects(title, session=None):
+    """Get all WikiProjects associated with a Wikipedia article"""
+    # Problem: what if title doesn't exist
+    # not sure if this handles cases where title is redirected
+    page = get_talk_page(title, session=session)
+    parsed = mwparser.parse(get_content(page))
+    return get_projects(parsed)
+
+
+def get_quality(title, session=None):
+    """Get the Wikipedia quality assessment of an article"""
+    CLASSES = ('fa', 'ga', 'b', 'c', 'start', 'stub',
+               'fl', 'list', 'dab', 'book', 'template',
+               'category', 'draft', 'redirect')
+    # current and future can be ignored
+    projs = get_wikiprojects(title, session=session)
+    classes_ = set()
+    for _, vals in projs.items():
+        k = vals['class']
+        if k is not None:
+            classes_.add(k)
+    if not len(classes_):
+        return None
+    else:
+        for k in CLASSES:
+            if k in classes_:
+                return k
+        return None
+
+        

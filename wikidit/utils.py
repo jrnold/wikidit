@@ -1,15 +1,9 @@
-from typing import Generator
+import itertools
 
-import pandas as pd
-
-def read_ndjson(file):
-    """Load lines from new-line delimited JSON file"""
-    for line in file:
-        yield json.loads(line)
-
-
-def write_ndjson(data, file) -> None:
-    """Load lines from new-line delimited JSON file."""
-    for x in data:
-        file.write(json.dumps(line) + "\n")
-
+def split_seq(iterable, size):
+    # From https://stackoverflow.com/a/312467/227406
+    it = iter(iterable)
+    item = list(itertools.islice(it, size))
+    while item:
+        yield item
+        item = list(itertools.islice(it, size))
