@@ -9,3 +9,11 @@ services:
     environment:
       JUPYTER_LAB_ENABLE: "yes"
     command: ["start.sh", "jupyter", "lab"]
+  flask:
+    build: .
+    ports:
+    - "5000:5000"
+    volumes:
+    - ".:/home/jovyan/work/"
+    command: ["python", "run.py"]
+    

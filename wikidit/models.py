@@ -5,7 +5,9 @@ import mwapi
 import pandas as pd
 import numpy as np
 
-from .mw import match_template, wikilink_title_matches
+from sklearn.pipeline import Pipeline
+
+from .mw import match_template, wikilink_title_matches, Session, get_page
 from .preprocessing import Featurizer
 
 def add_words(x, i):
@@ -36,35 +38,50 @@ def add_binary(x, col):
 
 def make_edits(page):
     edits = [('words',
-             add_count(page, 'words', 14)),
+             add_count(page, 'words', 14),
+              "Add a sentence (14 words)"),
              ('headings',
-              add_per_word(page, 'headings', 1, 2)),
+              add_per_word(page, 'headings', 1, 2),
+              "Organize the article with a sub-heading"),
              ('sub_headings',
-              add_per_word(page, 'sub_headings', 1, 2)),             
+              add_per_word(page, 'sub_headings', 1, 2),
+              "Organize the article with a sub-heading"),             
             ('images',
-             add_per_word(page, 'images', 1, 0)),
+             add_per_word(page, 'images', 1, 0),
+             "<a href=\"https://en.wikipedia.org/wiki/Wikipedia:Manual_of_Style/Images\"Add an image."),
             ('categories',
-             add_per_word(page, 'categories', 1, 1)),
+             add_per_word(page, 'categories', 1, 1),
+             "<a href=\"https://en.wikipedia.org/wiki/Help:Category\">Add another category.</a>"),
             ('wikilinks',
-             add_per_word(page, 'wikilinks', 1, 1)),
+             add_per_word(page, 'wikilinks', 1, 1),
+             "<a href=\"https://en.wikipedia.org/wiki/Wikipedia:External_links\">Add a link to another page in Wikipedia.</a>"),
             ('external_links',
-             add_per_word(page, 'external_links', 1, 1)),
+             add_per_word(page, 'external_links', 1, 1),
+             "<a href=\"https://en.wikipedia.org/wiki/Wikipedia:External_links\">Add an external link.</a>"),
             ('citation', 
-             add_per_word(page, 'cite_templates', 1, 3)),
+             add_per_word(page, 'cite_templates', 1, 3),
+             "<a href=\"https://en.wikipedia.org/wiki/Wikipedia:Citing_sources\">Add a citation.</a>"),
             ('ref',
-             add_per_word(page, 'ref_per_word', 1, 3)),
+             add_per_word(page, 'ref_per_word', 1, 3),
+             "<a href=\"https://en.wikipedia.org/wiki/Help:Footnotes#Footnotes:_the_basics\">Add a footnote.</a>"),
             ('coordinates', 
-             add_binary(page, 'coordinates')),
+             add_binary(page, 'coordinates'),
+             "Add coordinates."),
             ('infoboxes',
-             add_binary(page, 'infoboxes')),
+             add_binary(page, 'infoboxes'),
+             "Add an infobox."),
             ('backlog_accuracy',
-             add_count(page, 'backlog_accuracy', -1)),
+             add_count(page, 'backlog_accuracy', -1),
+             "Fix a backlog issue related to accuracy."),
             ('backlog_other',
-             add_count(page, 'backlog_other', -1)),
+             add_count(page, 'backlog_other', -1),
+             "Fix a backlog issue in the other category."),
             ('backlog_style',
-             add_count(page, 'backlog_style', -1)),
+             add_count(page, 'backlog_style', -1),
+             "Fix a backlog issue relating to style."),
             ('backlog_links',
-             add_count(page, 'backlog_links', -1))
+             add_count(page, 'backlog_links', -1),
+             "Fix a backlog issue relating to links.")
             ]
     return edits
 
@@ -81,7 +98,7 @@ def predict_page_edits(featurizer, content, pipeline):
     del revision['text']
 
     revision = pd.DataFrame.from_records([revision])
-    probs = pipeline.predict_proba(revision)[0, :]
+    probs = list(pipeline.predict_proba(revision)[0, :])
     best_class = str(pipeline.predict(revision)[0])
     
     # If predicted to be FA - nothing else to do.

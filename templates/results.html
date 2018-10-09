@@ -5,44 +5,46 @@
 {% endblock %}
 {% block content %}
 <div class="container">
-  <h2><a href="{{ wikipedia_url }}">{{ title }}</a></h2>
+  <h2><a href="{{ wikipedia_url }}">Suggested edits for {{ title }}</a></h2>
   <div class="row">
     <div class="col">
-      <h2>Quality</h2>
-
-      {{ fig | safe }}
-
-      </div>
-    </div>
-    <div class="col">
-      <h2>Improvements</h2>
-      The editing actions which are most likely to have the largest effects
-      on article quality.
-
-      <table class="table">
-        <thead>
-          <tr>
-            <th>
-              Action
-            </th>
-            <th>
-              Predicted Change in Quality Assessment Score
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for x in interventions %}
-          <tr>
-            <td>
-              {{ x.name }}
-            </td>
-            <td>
-              {{ x.value }}
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+        <p>
+        The wikidit model estimates that <a href="{{ wikipedia_url }}">{{ title }}</a> has
+        a quality level of {{ quality }}.
+        </p>
+        
+        <p>
+        The wikidit model gives a {{ class_prob }}% chance that <a href="{{ wikipedia_url }}">{{ title }}</a>
+        has a quality level of {{ next_level }} or higher. 
+        </p>
+        
+        <p>
+        The edits that will most improve the quality of this article are:
+        </p>
+            <table class="table">
+                <thead>
+                  <tr>
+                    <th>
+                      Action
+                    </th>
+                    <th>
+                      Predicted Change in Quality Assessment Score
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for x in edits %}
+                  <tr>
+                    <td>
+                      {{ x.description }}
+                    </td>
+                    <td>
+                      {{ x.value }}
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+            </table>
     </div>
   </div>
 </div>
