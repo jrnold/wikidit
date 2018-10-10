@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 {% block title %}wikidit - {{title}}{% endblock %}
 {% block headscript %}
-<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='wikidit.css')}}" >
 {% endblock %}
 {% block content %}
 <div class="container">
@@ -10,41 +10,45 @@
     <div class="col">
         <p>
         The wikidit model estimates that <a href="{{ wikipedia_url }}">{{ title }}</a> has
-        a quality level of {{ quality }}.
+            a quality level of <a href="{{ quality.href }}" class='quality-{{ quality.tag }} quality-link'>{{ quality.name }}</a>.
         </p>
         
-        <p>
-        The wikidit model gives a {{ class_prob }}% chance that <a href="{{ wikipedia_url }}">{{ title }}</a>
-        has a quality level of {{ next_level }} or higher. 
-        </p>
-        
-        <p>
-        The edits that will most improve the quality of this article are:
-        </p>
-            <table class="table">
-                <thead>
-                  <tr>
-                    <th>
-                      Action
-                    </th>
-                    <th>
-                      Predicted Change in Quality Assessment Score
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {% for x in edits %}
-                  <tr>
-                    <td>
-                      {{ x.description }}
-                    </td>
-                    <td>
-                      {{ x.value }}
-                    </td>
-                  </tr>
-                  {% endfor %}
-                </tbody>
-            </table>
+        {% if quality.tag == "FA" %}
+            This article is already at the highest quality level. Try editing something else instead.
+        {% else %}
+            <p>
+            The wikidit model gives a {{ class_prob }}% chance that <a href="{{ wikipedia_url }}">{{ title }}</a>
+            has a quality level of <a href="{{ next_level.href }}" class='quality-{{ next_level.tag }} quality-link'>{{ next_level.name }}</a> or higher. 
+            </p>
+
+            <p>
+            The edits that will most improve the quality of this article are:
+            </p>
+                <table class="table">
+                    <thead>
+                      <tr>
+                        <th>
+                          Action
+                        </th>
+                        <th>
+                          Predicted Change in Quality Assessment Score
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {% for x in edits %}
+                      <tr>
+                        <td>
+                          {{ x.description }}
+                        </td>
+                        <td>
+                          {{ x.value }}
+                        </td>
+                      </tr>
+                      {% endfor %}
+                    </tbody>
+                </table>
+          {% endif %}
     </div>
   </div>
 </div>

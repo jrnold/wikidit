@@ -44,6 +44,22 @@ def get_next_quality_cat(cat):
 def index():
     return render_template("index.html")
 
+QA = {
+    "FA": {"link": "https://en.wikipedia.org/wiki/Wikipedia:Featured_articles",
+           "name": "Featured article",
+           "color": "ffff66", "tag": "FA"},
+    "GA": {"href": "https://en.wikipedia.org/wiki/Wikipedia:Good_articles",
+           "name": "Good article",
+           "color": "66ff66", "tag": "GA"},
+    "B": {"href": "https://en.wikipedia.org/wiki/Category:B-Class_articles",
+          "name": "B-class article", "color": "b2ff66", "tag": "B"},
+    "C": {"href": "https://en.wikipedia.org/wiki/Category:C-Class_articles",
+          "name": "C-class article", "color": "ffff66", "tag": "C"},
+    "Start": {"href": "https://en.wikipedia.org/wiki/Category:Start-Class_articles",
+             "name": "Start", "color": "ffaa66", "tag": "Start"},
+    "Stub": {"href": "https://en.wikipedia.org/wiki/Category:Stub-Class_articles",
+             "name": "Stub", "color": "ffa4a4", "tag": "Stub"}
+}
 
 @app.route('/page')
 def wiki():
@@ -52,38 +68,16 @@ def wiki():
     page = get_page(session, title)
     result = predict_page_edits(featurizer, page['content'], MODEL)
     class_prob = round(result["predicted_class_prob"] * 100)
-    edits = [{'description': x[0], 'value': round(x[1] * 100)} for x in result['top_edits']]
+    edits = [{'description': Markup(x[1]), 'value': round(x[2] * 100)} for x in result['top_edits']]
+    quality = QA[result["predict"]]
+    next_level = QA[get_next_quality_cat(result["predict"])]
     return render_template("results.html", 
-                    quality = result["predict"],
-                    next_level = get_next_quality_cat(result["predict"]),
+                    quality = quality,
+                    next_level = next_level,
                     class_prob = class_prob,
                     edits = edits, 
                     title = title,
                     wikipedia_url = wikipedia_url(title))
-
-DESCRIPTIONS = {
-    "ref": "Add a reference footnote.",
-    "words": "Add a sentence (15 words).",
-    "heading": "Organize the article with a new heading",
-    "sub_heading": "Organize the article with a new sub_heading"
-}
-
-QA = {
-    "FA": {"link": "https://en.wikipedia.org/wiki/Wikipedia:Featured_articles",
-           "name": "Featured article",
-           "color": "ffff66"},
-    "GA": {"href": "https://en.wikipedia.org/wiki/Wikipedia:Good_articles",
-           "name": "Good article",
-           "color": "66ff66"},
-    "B": {"href": "https://en.wikipedia.org/wiki/Category:B-Class_articles",
-          "name": "B-class article", "color": "b2ff66"},
-    "C": {"href": "https://en.wikipedia.org/wiki/Category:C-Class_articles",
-          "name": "C-class article", "color": "ffff66"},
-    "Start": {"href": "https://en.wikipedia.org/wiki/Category:Start-Class_articles",
-             "name": "Start", "color": "ffaa66"},
-    "Stub": {"href": "https://en.wikipedia.org/wiki/Category:Stub-Class_articles",
-             "name": "Stub", "color": "ffa4a4"}
-}
 
 
 @app.errorhandler(404)
