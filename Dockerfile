@@ -34,4 +34,6 @@ RUN python -m spacy download en
 RUN python -m spacy download en_core_web_md
 RUN python -m spacy download en_core_web_lg
 
+EXPOSE 8000
+
 WORKDIR /home/jovyan/work
