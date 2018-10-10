@@ -13,7 +13,19 @@ a.quality-FA {
 a.quality-GA {
     background-color: #66ff66; 
 }
-span .quality-B {background-color: #b2ff66;}
-span .quality-C {background-color:: #ffff66;}
-span .quality-Start {background-color:: #ffaa66;}
-span .quality-Stub {background-color: #ffa4a4;}
+a.quality-B {background-color: #b2ff66;}
+a.quality-C {background-color:: #ffff66;}
+a.quality-Start {background-color:: #ffaa66;}
+a.quality-Stub {background-color: #ffa4a4;}
+a.quality-List {background-color: #c7b1ff;}
+a.quality-Book {background-color: #98ff98;}
+a.quality-Category {background-color: #ffdb58;}
+a.quality-Disambig {background-color: #00fa9a;}
+a.quality-File {background-color: #ddccff;}
+a.quality-Project {background-color: #c0c090;}
+a.quality-Redirect {background-color: #c0c0c0;}
+a.quality-Template {background-color: #fbcdb1;}
+a.quality-NA {background-color: #f5f5f5;}
+a.quality-Future {background-color: #b4bbff;}
+a.quality-Current {background-color: #e6a4ff;}
+a.quality-Draft {background-color: #e7b198;}
