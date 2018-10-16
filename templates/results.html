@@ -5,46 +5,48 @@
 {% endblock %}
 {% block content %}
 <div class="container">
-  <h2><a href="{{ wikipedia_url }}">Suggested edits for {{ title }}</a></h2>
+  <h2><a href="{{ wikipedia_url }}">{{ title }}</a></h2>
   <div class="row">
     <div class="col">
+        <h3>Quality Assessment</h3>
         <p>
-        {% if current_quality %}
-            The current <a href="https://en.wikipedia.org/wiki/Wikipedia:Content_assessment">quality class</a> of the article <a href="{{ wikipedia_url }}">{{ title }}</a> is <a href="{{ current_quality.href }}" class="quality-{{ current_quality.tag }} quality-link">{{ current_quality.name }}</a>.
+            Wikidit estimates the <a href="https://en.wikipedia.org/wiki/Wikipedia:Content_assessment">quality class</a> of <a href="{{ wikipedia_url }}">{{ title }}</a> to be <a href="{{ best.href }}" class="quality-{{ best.tag }} quality-link">{{ best.name }}</a>.
+            <p>
+            This probability that the model gives to each quality class is given below.
             </p>
-            {% if fa_quality %}
-                <p>
-                This article is already at the highest quality level, so wikidit does not have any suggestions for improvements.
-                </p>
-            {% elif bad_class %}
-                <p>
-                The model used by wikidit cannot offer suggestions for articles in the {{ current.quality.tag }} class.
-                </p>
-            {% else %}
-                <p>
-                The following edits are those that are most likely
-                to improve the quality of the article.
-                {{ edits }}
-                </p>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <td>Class</td>
+                        <td>Probability (%)</td>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for x in probs %} 
+                    <tr>
+                        <td>
+                        <a href="{{ x.href }}">{{ x.name }}</a>
+                        </td>
+                        <td>
+                            {{ x.prob }}%
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            
+        <h2>Suggested Edits</h2>
+        
+                {% if edits %}
+                <p>These edits are the most likely to improve the quality of the article.</p>
                   <ul>
                     {% for x in edits %}
                       <li>{{ x.description }} ({{ x.value }}) </li>
                     {% endfor %}
                   </ul>
-                <p>
-                  Wikidit estimates the probability that the quality of the article is
-                  actually greater thatn the current class using the features of other articles.
-                  Currently the wikidit model estimates that <a href="{{ wikipedia_url }}">{{ title }}</a>
-                  has {{ class_prob }}% of having a quality class higher than its current assigned
-                  label.
-                  The suggested edits are changes that will improve this percentage the most.
-                  The number in parentheses after each edit giving the is how much the edit is expected to
-                  improve that percentage.
-                </p>
-            {% endif %}
-        {% else %}
-            The model used by wikidit cannot offer suggestions for articles without a quality label.
-        {% endif %}
+                {% else %}
+                   Wikidit cannot suggest any edits at this time.
+                {% endif %}
     </div>
   </div>
 </div>

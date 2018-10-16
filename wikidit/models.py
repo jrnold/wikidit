@@ -43,8 +43,8 @@ def add_binary(x, col):
 
 def make_edits(page):
     edits = [('words',
-             add_count(page, 'words', 14),
-              "Add a sentence (14 words)"),
+             add_count(page, 'words', 15),
+              "Add a sentence (15 words)"),
              ('headings',
               add_per_word(page, 'headings', 1, 2),
               "<a href=\"https://en.wikipedia.org/wiki/Wikipedia:Manual_of_Style#Article_titles,_headings,_and_sections\">Organize the article with a heading</a>"),
@@ -98,6 +98,10 @@ def predict_page_edits_api(title, model, featurizer=Featurizer(), session=None):
     return predict_page_edits(featurizer, page['content'], model)
 
 
+def qual_score(prob):
+    return (prob * np.arange(1, prob.shape[1] + 1)).sum()
+
+
 def predict_page_edits(featurizer, content, model):
     revision = featurizer.parse_content(content)
     del revision['text']
@@ -105,22 +109,28 @@ def predict_page_edits(featurizer, content, model):
     # revision = create_features(revision)
 
     # probabilities for current class
-    prob = model.predict_proba(revision)[0, 1]
+    prob = model.predict_proba(revision)
+    best = str(model.predict(revision)[0])
+    score = qual_score(prob)
 
     # Calc new probabilities for all types of edits
     edits = [(nm, description, pd.DataFrame.from_records([x])) 
              for nm, x, description in make_edits(revision.to_dict('records')[0])]
-    new_probs = [(nm, description, model.predict_proba(ed)[0, 1]) for nm, description, ed in edits]
-    change_prob = [(nm, description, p - prob) for nm, description, p in new_probs]
-    top_edits = sorted([(nm, description, p) for (nm, description, p) in change_prob if p > 0],
-                       key=lambda x: -x[2])
+    edit_probs = [(nm, description, model.predict_proba(ed)) for nm, description, ed in edits]
+    edit_scores = [(nm, description, qual_score(p)) for nm, description, p in edit_probs]
+    edit_changes = [(n, d, s - score) for n, d, s in edit_scores]
+    top_edits = sorted([x for x in edit_changes if x[2] > 0.01], key=lambda x: -x[2])
     
     return {
-        'prob': prob,
-        'change_prob': change_prob,
+        'prob': list(zip(model.classes_, list(prob.ravel()))),
+        'score': score,
+        'edit_probs': edit_probs,
+        'edit_scores': edit_scores,
         'top_edits': top_edits,
-        'edits': edits
+        'edits': edits,
+        'best': best
     }
+
 
 _COUNT_COLS = ['words',
              # infobox as a binary

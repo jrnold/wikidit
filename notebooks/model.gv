@@ -1,0 +1,23 @@
+digraph {
+	root [label=""]
+	stub [label="P(Stub)"]
+	gtstub [label="P(x > Stub"]
+	start [label="P(Start)"]
+	gtstart [label="P(x > Start)"]
+	c [label="P(C)"]
+	gtc [label="P(x > C)"]
+	b [label="P(B)"]
+	gtb [label="P(x > B)"]
+	ga [label="P(GA)"]
+	fa [label="P(FA)"]
+	root -> stub
+	root -> gtstub
+	gtstub -> start
+	gtstub -> gtstart
+	gtstart -> c
+	gtstart -> gtc
+	gtc -> b
+	gtc -> gtb
+	gtb -> ga
+	gtb -> fa
+}

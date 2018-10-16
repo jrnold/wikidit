@@ -19,7 +19,7 @@ from wikidit.preprocessing import WP10_LABELS
 app = Flask(__name__)
 
 # Load instances that should only be loaded once
-MODEL_FILE = os.path.join("models", "xgboost-models.pkl")
+MODEL_FILE = os.path.join("models", "xgboost-sequential.pkl")
 with open(MODEL_FILE, "rb") as f:
     MODEL = dill.load(f)
     
@@ -75,32 +75,20 @@ def wiki():
     session = Session()
     title = request.args.get('page-title')
     page = get_page(session, title)
-    current_quality = get_quality(title, session=session)
     data = {
         'title': page['title'],
         'wikipedia_url': wikipedia_url(page['title']),
     }
-    if current_quality is None:
-        return render_template("results.html", **data)
-    if current_quality is not None:
-        data['current_quality'] = QA[current_quality]
-    if current_quality not in ("FA", "GA", "Start", "Stub", "C", "B"):
-        data['bad_class'] = True
-        return render_template("results.html", **data)
-    data['bad_class'] = False
-    # If highest quality, nothing else to do
-    if current_quality in ("FA",):
-        data['fa_quality'] = True
-        return render_template("results.html", **data)
-    data['fa_quality'] = False
-    # otherwise predict edits
-    model = MODEL[current_quality]
-    result = predict_page_edits(featurizer, page['content'], model)
+    result = predict_page_edits(featurizer, page['content'], MODEL)
+    data['probs'] = reversed([{'prob': round(p * 100), **QA[k]} for k, p in result['prob']])
     data['edits'] = [{'description': Markup(x[1]), 'value': round(x[2] * 100)} 
                      for x in result['top_edits']]
-    data['class_prob'] = round(result["prob"] * 100)
+    data['best'] = QA[result['best']]
     return render_template("results.html", **data)
 
+@app.route('/about')
+def about():
+    return render_template("about.html")
 
 @app.errorhandler(404)
 def page_not_found(e):
