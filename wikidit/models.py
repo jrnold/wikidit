@@ -119,7 +119,7 @@ def predict_page_edits(featurizer, content, model):
     edit_probs = [(nm, description, model.predict_proba(ed)) for nm, description, ed in edits]
     edit_scores = [(nm, description, qual_score(p)) for nm, description, p in edit_probs]
     edit_changes = [(n, d, s - score) for n, d, s in edit_scores]
-    top_edits = sorted([x for x in edit_changes if x[2] > 0.01], key=lambda x: -x[2])
+    top_edits = sorted([x for x in edit_changes if x[2] > 0], key=lambda x: -x[2])
     
     return {
         'prob': list(zip(model.classes_, list(prob.ravel()))),
