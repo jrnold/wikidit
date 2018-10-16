@@ -12,14 +12,14 @@ import plotly.offline
 
 import pandas as pd
 
-from wikidit.mw import Session, get_page
+from wikidit.mw import Session, get_page, get_quality
 from wikidit.models import Featurizer, predict_page_edits
 from wikidit.preprocessing import WP10_LABELS
 
 app = Flask(__name__)
 
 # Load instances that should only be loaded once
-MODEL_FILE = os.path.join("models", "model.pkl")
+MODEL_FILE = os.path.join("models", "xgboost-models.pkl")
 with open(MODEL_FILE, "rb") as f:
     MODEL = dill.load(f)
     
@@ -47,37 +47,59 @@ def index():
 QA = {
     "FA": {"link": "https://en.wikipedia.org/wiki/Wikipedia:Featured_articles",
            "name": "Featured article",
-           "color": "ffff66", "tag": "FA"},
+           "tag": "FA"},
     "GA": {"href": "https://en.wikipedia.org/wiki/Wikipedia:Good_articles",
            "name": "Good article",
-           "color": "66ff66", "tag": "GA"},
+           "tag": "GA"},
     "B": {"href": "https://en.wikipedia.org/wiki/Category:B-Class_articles",
-          "name": "B-class article", "color": "b2ff66", "tag": "B"},
+          "name": "B-class article",  "tag": "B"},
     "C": {"href": "https://en.wikipedia.org/wiki/Category:C-Class_articles",
-          "name": "C-class article", "color": "ffff66", "tag": "C"},
+          "name": "C-class article", "tag": "C"},
     "Start": {"href": "https://en.wikipedia.org/wiki/Category:Start-Class_articles",
-             "name": "Start", "color": "ffaa66", "tag": "Start"},
+             "name": "Start", "tag": "Start"},
     "Stub": {"href": "https://en.wikipedia.org/wiki/Category:Stub-Class_articles",
-             "name": "Stub", "color": "ffa4a4", "tag": "Stub"}
+             "name": "Stub",  "tag": "Stub"},
+    "FL": {"href": "https://en.wikipedia.org/wiki/Category:FL-Class_articles",
+           "tag": "FL"},
+    "List": {"tag": "List", "href": "https://en.wikipedia.org/wiki/Category:List-Class_articles"},
+    "Disambig": {"tag": "Disambig", "href": "https://en.wikipedia.org/wiki/Category:Disambig-Class_articles"},
+    "Book": {"tag": "Book", "href": "https://en.wikipedia.org/wiki/Category:Bookd-Class_articles"},
+    "Template": {"tag": "Template", "href": "https://en.wikipedia.org/wiki/Category:Template-Class_articles"},
+    "Category": {"tag": "Category", "href": "https://en.wikipedia.org/wiki/Category:Category-Class_articles"},
+    "Draft": {"tag": "Draft", "href": "https://en.wikipedia.org/wiki/Category:Draft-Class_articles"},
+    "Redirect": {"tag": "Redirect", "href": "https://en.wikipedia.org/wiki/Category:Redirect-Class_articles"}
 }
 
 @app.route('/page')
 def wiki():
-    title = request.args.get('page-title')
     session = Session()
+    title = request.args.get('page-title')
     page = get_page(session, title)
-    result = predict_page_edits(featurizer, page['content'], MODEL)
-    class_prob = round(result["predicted_class_prob"] * 100)
-    edits = [{'description': Markup(x[1]), 'value': round(x[2] * 100)} for x in result['top_edits']]
-    quality = QA[result["predict"]]
-    next_level = QA[get_next_quality_cat(result["predict"])]
-    return render_template("results.html", 
-                    quality = quality,
-                    next_level = next_level,
-                    class_prob = class_prob,
-                    edits = edits, 
-                    title = title,
-                    wikipedia_url = wikipedia_url(title))
+    current_quality = get_quality(title, session=session)
+    data = {
+        'title': page['title'],
+        'wikipedia_url': wikipedia_url(page['title']),
+    }
+    if current_quality is None:
+        return render_template("results.html", **data)
+    if current_quality is not None:
+        data['current_quality'] = QA[current_quality]
+    if current_quality not in ("FA", "GA", "Start", "Stub", "C", "B"):
+        data['bad_class'] = True
+        return render_template("results.html", **data)
+    data['bad_class'] = False
+    # If highest quality, nothing else to do
+    if current_quality in ("FA",):
+        data['fa_quality'] = True
+        return render_template("results.html", **data)
+    data['fa_quality'] = False
+    # otherwise predict edits
+    model = MODEL[current_quality]
+    result = predict_page_edits(featurizer, page['content'], model)
+    data['edits'] = [{'description': Markup(x[1]), 'value': round(x[2] * 100)} 
+                     for x in result['top_edits']]
+    data['class_prob'] = round(result["prob"] * 100)
+    return render_template("results.html", **data)
 
 
 @app.errorhandler(404)

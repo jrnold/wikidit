@@ -1,3 +1,4 @@
+import itertools
 import re
 
 import mwparserfromhell as mwparser
@@ -19,10 +20,10 @@ def add_words(x, i):
 
 def add_per_word(x, col, i, w):
     x = x.copy()
-    x[col] += i
+    words = x['words']
     x['words'] += w * i
     if x['words'] > 0:
-        x[f"{col}_per_word"] = x[col] / x['words']
+        x[f"{col}_per_word"] = x[col]  / x['words']
     return x
 
 
@@ -97,37 +98,63 @@ def predict_page_edits_api(title, model, featurizer=Featurizer(), session=None):
     return predict_page_edits(featurizer, page['content'], model)
 
 
-def predict_page_edits(featurizer, content, pipeline):
+def predict_page_edits(featurizer, content, model):
     revision = featurizer.parse_content(content)
     del revision['text']
-
     revision = pd.DataFrame.from_records([revision])
-    probs = list(pipeline.predict_proba(revision)[0, :])
-    best_class = str(pipeline.predict(revision)[0])
-    
-    # If predicted to be FA - nothing else to do.
-    if best_class == "FA":
-        return {"predicted_class": best_class}
-    
-    # Create new pipeline for only that class
-    pipe2 = Pipeline([('mapper', pipeline.named_steps['mapper']),
-                      ('clf', pipeline.named_steps['clf'].named_estimators_[best_class])])
+    # revision = create_features(revision)
 
-    # Predicted probability for > current predicted class
-    prob_class = pipe2.predict_proba(revision)[0, 1]
+    # probabilities for current class
+    prob = model.predict_proba(revision)[0, 1]
 
     # Calc new probabilities for all types of edits
     edits = [(nm, description, pd.DataFrame.from_records([x])) 
              for nm, x, description in make_edits(revision.to_dict('records')[0])]
-    new_probs = [(nm, description, pipe2.predict_proba(ed)[0, 1]) for nm, description, ed in edits]
-    change_prob = [(nm, description, p - prob_class) for nm, description, p in new_probs]
+    new_probs = [(nm, description, model.predict_proba(ed)[0, 1]) for nm, description, ed in edits]
+    change_prob = [(nm, description, p - prob) for nm, description, p in new_probs]
     top_edits = sorted([(nm, description, p) for (nm, description, p) in change_prob if p > 0],
                        key=lambda x: -x[2])
     
     return {
-        'predict': best_class,
-        'proba': probs,
-        'predicted_class_prob': prob_class,
+        'prob': prob,
         'change_prob': change_prob,
-        'top_edits': top_edits
+        'top_edits': top_edits,
+        'edits': edits
     }
+
+_COUNT_COLS = ['words',
+             # infobox as a binary
+             'backlog_accuracy',
+             'backlog_content',
+             'backlog_other',
+             'backlog_style',
+             'backlog_links']
+
+_PER_WORD_COLS = [
+             'headings_per_word',
+             'sub_headings_per_word',
+             # links
+             'images_per_word',
+             'categories_per_word',
+             'wikilinks_per_word',
+             'external_links_per_word',
+             # templates
+             'main_templates_per_word',
+             'cite_templates_per_word',
+             'ref_per_word'    
+]
+
+_BINARY_COLS = ['coordinates', 'infoboxes']
+
+_RESPONSE_COL = ['wp10']
+
+def create_features(df):
+    """Create features needed for the data frame"""
+    # I do this once rather than multiple times for each data frame
+    df = df.copy()
+    for c in _COUNT_COLS:
+        df[c] = np.sqrt(df[c])
+    for c in _BINARY_COLS:
+        df[c] = df[c].astype(bool)
+    allcols = list(itertools.chain(_PER_WORD_COLS, _COUNT_COLS, _BINARY_COLS))
+    return df.loc[:, allcols]

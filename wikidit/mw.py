@@ -96,6 +96,7 @@ def get_page(session, title):
     if title is None or title == '':
         return None
     params = {'action': 'query', 'titles': title, 'prop': "revisions",
+              'redirects': True,
               'rvprop': 'ids|content|timestamp', "rvslots": "main"}
     r = session.get(**params)    
     page = list(r['query']['pages'].values())[0]
@@ -109,8 +110,6 @@ def get_page(session, title):
     rev['pageid'] = page['pageid']
     return rev
 
-from wikidit.mw import Session
-import mwparserfromhell as mwparser
 
 
 def normalize_title(title, session=None):
@@ -184,9 +183,12 @@ def get_wikiprojects(title, session=None):
 
 def get_quality(title, session=None):
     """Get the Wikipedia quality assessment of an article"""
-    CLASSES = ('fa', 'ga', 'b', 'c', 'start', 'stub',
-               'fl', 'list', 'dab', 'book', 'template',
-               'category', 'draft', 'redirect')
+    CLASSES = {'fa': "FA", 'ga': "GA", 'b': "B", 'c': "C", 
+               'start': "Start", 'stub': "Stub",
+               'fl': "FL", 'list': "List", 'dab': "Disambig", 
+               'book': "Book", 'template': "Template",
+               'category': "Category", 'draft': "Draft", 'redirect': "Redirect",
+               'na': "NA", "current": "Current", "future": "Future"}
     # current and future can be ignored
     projs = get_wikiprojects(title, session=session)
     classes_ = set()
@@ -199,7 +201,7 @@ def get_quality(title, session=None):
     else:
         for k in CLASSES:
             if k in classes_:
-                return k
+                return CLASSES[k]
         return None
 
         

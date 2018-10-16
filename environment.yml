@@ -2,15 +2,19 @@ name: wikidit
 channels:
 - conda-forge
 dependencies:
-- python=3.6
 - flask
+- graphviz
 - gunicorn
 - invoke
 - joblib
 - jupyter
+- jupyterlab
 - lxml
+- matplotlib
+- nb_conda_kernels
 - pandas=0.23.*
 - plotly
+- python=3.6.*
 - scikit-learn>=0.20.*
 - spacy=2.0.*
 - smart_open
