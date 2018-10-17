@@ -7,10 +7,23 @@
 <div class="container">
   <h2><a href="{{ wikipedia_url }}">{{ title }}</a></h2>
   <div class="row">
-    <div class="col">
+      <div class="col">
+        <h2>Suggested Edits</h2>
+                {% if edits %}
+                <p>These edits are the most likely to improve the quality of the article.</p>
+                  <ul>
+                    {% for x in edits %}
+                      <li>{{ x.description }} ({{ x.value }}) </li>
+                    {% endfor %}
+                  </ul>
+                {% else %}
+                   Wikidit cannot suggest any edits at this time.
+                {% endif %}
+      </div>
+      <div class="col">
         <h3>Quality Assessment</h3>
         <p>
-            Wikidit estimates the <a href="https://en.wikipedia.org/wiki/Wikipedia:Content_assessment">quality class</a> of <a href="{{ wikipedia_url }}">{{ title }}</a> to be <a href="{{ best.href }}" class="quality-{{ best.tag }} quality-link">{{ best.name }}</a>.
+            Wikidit estimates the <a href="https://en.wikipedia.org/wiki/Wikipedia:Content_assessment">quality class</a> of <a href="{{ wikipedia_url }}">{{ title }}</a> to be a <a href="{{ best.href }}" class="quality-{{ best.tag }} quality-link">{{ best.name }}</a>.
             <p>
             This probability that the model gives to each quality class is given below.
             </p>
@@ -34,19 +47,7 @@
                 {% endfor %}
                 </tbody>
             </table>
-            
-        <h2>Suggested Edits</h2>
-        
-                {% if edits %}
-                <p>These edits are the most likely to improve the quality of the article.</p>
-                  <ul>
-                    {% for x in edits %}
-                      <li>{{ x.description }} ({{ x.value }}) </li>
-                    {% endfor %}
-                  </ul>
-                {% else %}
-                   Wikidit cannot suggest any edits at this time.
-                {% endif %}
+      </div>
     </div>
   </div>
 </div>
