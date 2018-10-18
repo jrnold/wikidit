@@ -74,6 +74,9 @@ QA = {
 def wiki():
     session = Session()
     title = request.args.get('page-title')
+    # if an empty title, return the original index
+    if title is None or title.strip() == '':
+        return render_template('index.html')
     page = get_page(session, title)
     data = {
         'title': page['title'],

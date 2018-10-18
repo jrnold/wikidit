@@ -1,9 +1,9 @@
+<p>Enter the title of an English Wikipedia article:</p>
 <form  action="/page" method="GET">
-  <div class="form-group">
-    <label for="page-title">Enter the title of an English Wikipedia article:</label>
-    <input type="text" id="page-title" name='page-title' placeholder="e.g. Data science">
-  </div>
-  <div>
-    <button type="submit" class="btn btn-primary" value="Submit">Submit</button>
-  </div>
+    <div class="input-group">
+      <input type="text" id="page-title" class="form-control" name='page-title' placeholder="Data science" aria-label="Enter the title of an English Wikipedia article:">
+      <div class="input-group-append">
+        <button class="btn btn-primary" type="submit" value="submit">Submit</button>
+      </div>
+    </div>
 </form>
