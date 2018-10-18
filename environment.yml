@@ -15,6 +15,7 @@ dependencies:
 - pandas=0.23.*
 - plotly
 - python=3.6.*
+- python-graphviz
 - scikit-learn>=0.20.*
 - seaborn
 - spacy=2.0.*
