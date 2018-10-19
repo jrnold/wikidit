@@ -22,8 +22,9 @@ def add_per_word(x, col, i, w):
     x = x.copy()
     words = x['words']
     x['words'] += w * i
+    x[col] += i
     if x['words'] > 0:
-        x[f"{col}_per_word"] = x[col]  / x['words']
+        x[f"{col}_per_word"] = x[col] / x['words']
     return x
 
 
@@ -37,7 +38,7 @@ def add_count(x, col, i):
 
 def add_binary(x, col):
     x = x.copy()
-    x[col] = x[col] or True
+    x[col] = bool(x[col]) or True
     return x
 
 
@@ -64,10 +65,10 @@ def make_edits(page):
              add_per_word(page, 'external_links', 1, 1),
              "<a href=\"https://en.wikipedia.org/wiki/Wikipedia:External_links\">Add an external link</a>"),
             ('citation', 
-             add_per_word(page, 'cite_templates', 1, 3),
+             add_per_word(page, 'cite_templates', 1, 5),
              "<a href=\"https://en.wikipedia.org/wiki/Wikipedia:Citing_sources\">Add a citation</a>"),
             ('ref',
-             add_per_word(page, 'ref_per_word', 1, 3),
+             add_per_word(page, 'ref_per_word', 1, 15),
              "<a href=\"https://en.wikipedia.org/wiki/Help:Footnotes#Footnotes:_the_basics\">Add a footnote</a>"),
             ('coordinates', 
              add_binary(page, 'coordinates'),
