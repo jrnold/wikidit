@@ -43,20 +43,23 @@ def add_binary(x, col):
 
 
 def make_edits(page):
-    edits = [('words',
+    edits = [('sentence',
              add_count(page, 'words', 15),
               "Add a sentence (15 words)"),
+             ('paragraph',
+              add_count(page, 'words', 150),
+               "Add a paragraph(150 words)"),
              ('headings',
               add_per_word(page, 'headings', 1, 2),
               "<a href=\"https://en.wikipedia.org/wiki/Wikipedia:Manual_of_Style#Article_titles,_headings,_and_sections\">Organize the article with a heading</a>"),
              ('sub_headings',
               add_per_word(page, 'sub_headings', 1, 2),
-              "<a href=\"https://en.wikipedia.org/wiki/Wikipedia:Manual_of_Style#Article_titles,_headings,_and_sections\">Organize the article with a sub-heading</a>"),             
+              "<a href=\"https://en.wikipedia.org/wiki/Wikipedia:Manual_of_Style#Article_titles,_headings,_and_sections\">Organize the article with a sub-heading</a>"),
             ('images',
              add_per_word(page, 'images', 1, 0),
              "<a href=\"https://en.wikipedia.org/wiki/Wikipedia:Manual_of_Style/Images\">Add an image</a>"),
             ('categories',
-             add_per_word(page, 'categories', 1, 1),
+             add_per_word(page, 'categories', 1, 2),
              "<a href=\"https://en.wikipedia.org/wiki/Help:Category\">Add another category.</a>"),
             ('wikilinks',
              add_per_word(page, 'wikilinks', 1, 1),
@@ -64,13 +67,13 @@ def make_edits(page):
             ('external_links',
              add_per_word(page, 'external_links', 1, 1),
              "<a href=\"https://en.wikipedia.org/wiki/Wikipedia:External_links\">Add an external link</a>"),
-            ('citation', 
+            ('citation',
              add_per_word(page, 'cite_templates', 1, 5),
              "<a href=\"https://en.wikipedia.org/wiki/Wikipedia:Citing_sources\">Add a citation</a>"),
             ('ref',
              add_per_word(page, 'ref_per_word', 1, 15),
              "<a href=\"https://en.wikipedia.org/wiki/Help:Footnotes#Footnotes:_the_basics\">Add a footnote</a>"),
-            ('coordinates', 
+            ('coordinates',
              add_binary(page, 'coordinates'),
              "<a href=\"https://en.wikipedia.org/wiki/Wikipedia:WikiProject_Geographical_coordinates#Coordinate_templates\">Add coordinates.</a>"),
             ('infoboxes',
@@ -92,10 +95,9 @@ def make_edits(page):
     return edits
 
 
-def predict_page_edits_api(title, model, featurizer=Featurizer(), session=None):
-    if session is None:
-        session = Session()
-    page = get_page(session, title)
+def predict_page_edits_api(title, model, featurizer=Featurizer(),
+                           session=Session()):
+    page = get_page(title, session)
     return predict_page_edits(featurizer, page['content'], model)
 
 
@@ -115,7 +117,7 @@ def predict_page_edits(featurizer, content, model):
     score = qual_score(prob)
 
     # Calc new probabilities for all types of edits
-    edits = [(nm, description, pd.DataFrame.from_records([x])) 
+    edits = [(nm, description, pd.DataFrame.from_records([x]))
              for nm, x, description in make_edits(revision.to_dict('records')[0])]
     edit_probs = [(nm, description, model.predict_proba(ed)) for nm, description, ed in edits]
     edit_scores = [(nm, description, qual_score(p)) for nm, description, p in edit_probs]
@@ -152,7 +154,7 @@ _PER_WORD_COLS = [
              # templates
              'main_templates_per_word',
              'cite_templates_per_word',
-             'ref_per_word'    
+             'ref_per_word'
 ]
 
 _BINARY_COLS = ['coordinates', 'infoboxes']

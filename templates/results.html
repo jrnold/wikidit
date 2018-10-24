@@ -10,14 +10,23 @@
       <div class="col">
         <h2>Suggested Edits</h2>
                 {% if edits %}
-                <p>These edits are the most likely to improve the quality of the article.</p>
-                  <ul>
+                <p>These actions are expected to improve the quality of the article. The number in the right
+                  hand side column is the predicted probability that the action will increase the article 
+                  quality assessment category. Wikidit bases its suggesions on a statistical analysis
+                  of similar articles.
+                </p>
+                  <table class="table">
+                    <thead>
+                        <tr><th>Action</th><th>Improve Category</th>
+                    </thead>
+                    <tbody>
                     {% for x in edits %}
-                      <li>{{ x.description }} ({{ x.value }}) </li>
+                        <tr><td>{{ x.description }}</td><td>{{ x.value }}%</td></tr>
                     {% endfor %}
-                  </ul>
+                    </tbody>
+                  </table>
                 {% else %}
-                   Wikidit cannot suggest any edits at this time.
+                   Wikidit cannot suggest any actions at this time.
                 {% endif %}
       </div>
       <div class="col">

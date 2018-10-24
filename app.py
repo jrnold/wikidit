@@ -22,7 +22,7 @@ app = Flask(__name__)
 MODEL_FILE = os.path.join("models", "xgboost-sequential.pkl")
 with open(MODEL_FILE, "rb") as f:
     MODEL = dill.load(f)
-    
+
 featurizer = Featurizer()
 
 
@@ -70,6 +70,7 @@ QA = {
     "Redirect": {"tag": "Redirect", "href": "https://en.wikipedia.org/wiki/Category:Redirect-Class_articles"}
 }
 
+
 @app.route('/page')
 def wiki():
     session = Session()
@@ -77,25 +78,28 @@ def wiki():
     # if an empty title, return the original index
     if title is None or title.strip() == '':
         return render_template('index.html')
-    page = get_page(session, title)
+    page = get_page(title)
     data = {
         'title': page['title'],
         'wikipedia_url': wikipedia_url(page['title']),
     }
     result = predict_page_edits(featurizer, page['content'], MODEL)
     data['probs'] = reversed([{'prob': round(p * 100), **QA[k]} for k, p in result['prob']])
-    data['edits'] = [{'description': Markup(x[1]), 'value': round(x[2] * 100)} 
-                     for x in result['top_edits']]
+    data['edits'] = [{'description': Markup(x[1]), 'value': round(x[2] * 100)}
+                     for x in result['top_edits'] if x[2] > 0.005]
     data['best'] = QA[result['best']]
     return render_template("results.html", **data)
+
 
 @app.route('/about')
 def about():
     return render_template("about.html")
 
+
 @app.errorhandler(404)
 def page_not_found(e):
     return (render_template('404.html'), 404)
+
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', debug=True)

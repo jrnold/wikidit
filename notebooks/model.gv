@@ -1,23 +1,23 @@
 digraph {
 	root [label=""]
-	stub [label="P(Stub)"]
-	gtstub [label="P(x > Stub"]
-	start [label="P(Start)"]
-	gtstart [label="P(x > Start)"]
-	c [label="P(C)"]
-	gtc [label="P(x > C)"]
-	b [label="P(B)"]
-	gtb [label="P(x > B)"]
-	ga [label="P(GA)"]
-	fa [label="P(FA)"]
-	root -> stub
-	root -> gtstub
-	gtstub -> start
-	gtstub -> gtstart
-	gtstart -> c
-	gtstart -> gtc
-	gtc -> b
-	gtc -> gtb
-	gtb -> ga
-	gtb -> fa
+	stub [label="P(Stub)" shape=rectangle]
+	gtstub [label=""]
+	start [label="P(Start)" shape=rectangle]
+	gtstart [label=""]
+	c [label="P(C)" shape=rectangle]
+	gtc [label=""]
+	b [label="P(B)" shape=rectangle]
+	gtb [label=""]
+	ga [label="P(GA)" shape=rectangle]
+	fa [label="P(FA)" shape=rectangle]
+	root -> stub [label="P(Stub)"]
+	root -> gtstub [label="P(X > Stub)"]
+	gtstub -> start [label="P(Start)"]
+	gtstub -> gtstart [label="P(X > Start | X > Stub)"]
+	gtstart -> c [label="P(X = C | X > Start)"]
+	gtstart -> gtc [label="P(X > C | X > Start)"]
+	gtc -> b [label="P(X > Start | X > C)"]
+	gtc -> gtb [label="P(X > Start | X > C)"]
+	gtb -> ga [label="P(X = GA | X > B)"]
+	gtb -> fa [label="P(X = FA | X > B)"]
 }
