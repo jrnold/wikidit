@@ -73,12 +73,13 @@ QA = {
 
 @app.route('/page')
 def wiki():
-    session = Session()
     title = request.args.get('page-title')
     # if an empty title, return the original index
     if title is None or title.strip() == '':
         return render_template('index.html')
     page = get_page(title)
+    if page is None:
+        return render_template("not_found.html", title=title)
     data = {
         'title': page['title'],
         'wikipedia_url': wikipedia_url(page['title']),
