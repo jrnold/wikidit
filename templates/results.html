@@ -5,26 +5,45 @@
 {% endblock %}
 {% block content %}
 <div class="container">
-  <h2><a href="{{ wikipedia_url }}">{{ title }}</a></h2>
+    <div class="row">    
+    <h2>
+        <a href="{{ wikipedia_url }}">{{ title }}</a>: Suggested Edits
+    </h2>
+    <div>
+    <div class="row">
+    <p>
+      Quality assessment and suggested edits for the article <a href="{{ wikipedia_url }}">{{ title }}</a>.
+    </p>
+  </div>
   <div class="row">
       <div class="col">
         <h3>Suggested Edits</h3>
                 {% if edits %}
-                <p>These actions are expected to improve the quality of the article. The number in the right
-                  hand side column is the predicted probability that the action will increase the article 
-                  quality assessment category. Wikidit bases its suggesions on a statistical analysis
-                  of similar articles.
-                </p>
                   <table class="table">
                     <thead>
                         <tr><th>Action</th><th>Improve Category</th>
                     </thead>
                     <tbody>
                     {% for x in edits %}
-                        <tr><td>{{ x.description }}</td><td>{{ x.value }}%</td></tr>
+                        <tr>
+                            <td>{{ x.description }}</td>
+                            <td>
+                            <div class="progress">
+                              <div class="progress-bar" role="progressbar" aria-valuenow="{{ x.value }}"
+                                 aria-valuemin="0" aria-valuemax="100" style="width:{{ x.value }}%">
+                                {{ x.value }}%
+                              </div>
+                            </div>
+                            </td>
+                        </tr>
                     {% endfor %}
                     </tbody>
                   </table>
+                <p>These actions are expected to improve the quality of the article. The number in the right
+                  hand side column is the predicted probability that the action will increase the article 
+                  quality assessment category. Wikidit bases its suggesions on a statistical analysis
+                  of similar articles.
+                </p>          
                 {% else %}
                    Wikidit cannot suggest any actions at this time.
                 {% endif %}
@@ -32,15 +51,13 @@
       <div class="col">
         <h3>Quality Assessment</h3>
         <p>
-            Wikidit estimates the <a href="https://en.wikipedia.org/wiki/Wikipedia:Content_assessment">quality class</a> of <a href="{{ wikipedia_url }}">{{ title }}</a> to be a <a href="{{ best.href }}" class="quality-{{ best.tag }} quality-link">{{ best.name }}</a>.
-            <p>
-            This probability that the model gives to each quality class is given below.
+            Wikidit best estimate of the quality of <a href="{{ wikipedia_url }}">{{ title }}</a> to be: <a href="{{ best.href }}" class="quality-{{ best.tag }} quality-link">{{ best.name }}</a>. The probability that the model gives to each quality class is given below. See the Wikipedia article <a href="https://en.wikipedia.org/wiki/Wikipedia:Content_assessment">Content assessment</a> for the meaning of these classes.
             </p>
             <table class="table">
                 <thead>
                     <tr>
-                        <td>Class</td>
-                        <td>Probability (%)</td>
+                        <th>Class</th>
+                        <th>Probability (%)</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -50,7 +67,12 @@
                         <a href="{{ x.href }}">{{ x.name }}</a>
                         </td>
                         <td>
-                            {{ x.prob }}%
+                            <div class="progress">
+                              <div class="progress-bar" role="progressbar" aria-valuenow="{{ x.prob }}"
+                                 aria-valuemin="0" aria-valuemax="100" style="width:{{ x.prob }}%">
+                                {{ x.prob }}%
+                              </div>
+                            </div>
                         </td>
                     </tr>
                 {% endfor %}

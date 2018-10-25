@@ -21,33 +21,25 @@ class SequentialClassifier(_BaseComposition, ClassifierMixin, TransformerMixin):
         self.n_jobs = n_jobs
         self.proba_transform = proba_transform
 
-    @property
-    def named_estimators(self):
-        return Bunch(**dict(self.estimator))
-
     def fit(self, X, y, categories='auto'):
         # this is hard-coded for categorical variables
-        self.classes_ = y.categories
-
-        categories = self.classes_[:-1]
+        if isinstance(y, pd.Series) and hasattr(y, 'cat'):
+            y = y.cat.codes
+        
+        self.n_classes_ = np.max(y) + 1
+        categories = list(range(self.n_classes_))
 
         # order of estimators
         self.estimators_ = Parallel(n_jobs=self.n_jobs)(
                 delayed(_parallel_fit_estimator)(clone(self.estimator),
                                                  X, y, cat)
-                for cat in categories)
-
-        self.named_estimators_ = Bunch(**dict())
-        for k, e in zip(self.classes_[:-1], self.estimators_):
-            self.named_estimators_[k] = e
+                for cat in categories[:-1])
         return self
 
     def predict(self, X):
         # For prediction use the median class, not the modal class
         cdf = np.cumsum(self.predict_proba(X), axis=1)
         out = np.argmax(cdf >= 0.5, axis=1)
-        out = pd.Categorical.from_codes(out, categories=self.classes_,
-                                        ordered=True)
         return out
 
     def _collect_log_probas(self, X):
@@ -61,12 +53,14 @@ class SequentialClassifier(_BaseComposition, ClassifierMixin, TransformerMixin):
 
     def _predict_log_proba(self, X):
         """Predict log class probabilities for X"""
-        out = np.empty((X.shape[0], len(self.classes_)))
+        out = np.zeros((X.shape[0], self.n_classes_))
         for i, logp in enumerate(self._collect_log_probas(X)):
-            if i > 0:
-                # add log conditional probability
-                logp += out[:, (i, )]
-            out[:, i:(i + 2)] = logp
+            out[:, i] += logp[:, 0]
+            for j in range(i + 1, self.n_classes_):
+                out[:, j] += logp[:, 1]
+            # add log conditional probability
+            # logp += out[:, (i, )]
+            # out[:, i:(i + 2)] = logp
         return out
 
     @property
@@ -103,4 +97,4 @@ class SequentialClassifier(_BaseComposition, ClassifierMixin, TransformerMixin):
         return self
 
     def score(self, X, y):
-        return 1 - (np.mean(np.abs(self.predict(X) - y.codes)) / (len(self.classes_) - 1))
+        return 1 - (np.mean(np.abs(self.predict(X) - y.codes)) / (self.n_classes_ - 1))

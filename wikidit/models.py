@@ -9,7 +9,7 @@ import numpy as np
 from sklearn.pipeline import Pipeline
 
 from .mw import match_template, wikilink_title_matches, Session, get_page
-from .preprocessing import Featurizer
+from .preprocessing import Featurizer, WP10_LABELS
 
 
 def add_words(x, i):
@@ -48,7 +48,7 @@ def make_edits(page):
               "Add a sentence (15 words)"),
              ('paragraph',
               add_count(page, 'words', 150),
-               "Add a paragraph(150 words)"),
+               "Add a paragraph (150 words)"),
              ('headings',
               add_per_word(page, 'headings', 1, 2),
               "<a href=\"https://en.wikipedia.org/wiki/Wikipedia:Manual_of_Style#Article_titles,_headings,_and_sections\">Organize the article with a heading</a>"),
@@ -102,7 +102,7 @@ def predict_page_edits_api(title, model, featurizer=Featurizer(),
 
 
 def qual_score(prob):
-    return (prob * np.arange(1, prob.shape[1] + 1)).sum()
+    return (prob * np.arange(prob.shape[1])).sum()
 
 
 def predict_page_edits(featurizer, content, model):
@@ -113,7 +113,7 @@ def predict_page_edits(featurizer, content, model):
 
     # probabilities for current class
     prob = model.predict_proba(revision)
-    best = str(model.predict(revision)[0])
+    best = model.predict(revision)[0]
     score = qual_score(prob)
 
     # Calc new probabilities for all types of edits
@@ -125,13 +125,13 @@ def predict_page_edits(featurizer, content, model):
     top_edits = sorted([x for x in edit_changes if x[2] > 0], key=lambda x: -x[2])
     
     return {
-        'prob': list(zip(model.classes_, list(prob.ravel()))),
+        'prob': list(zip(list(WP10_LABELS), list(prob.ravel()))),
         'score': score,
         'edit_probs': edit_probs,
         'edit_scores': edit_scores,
         'top_edits': top_edits,
         'edits': edits,
-        'best': best
+        'best': WP10_LABELS[best]
     }
 
 

@@ -15,6 +15,9 @@ from spacy.lang.en import English
 
 from .mw import match_template, wikilink_title_matches
 
+NLP = spacy.load("en_core_web_md", disable=['ner', 'parser'])
+# NLP = English()
+
 # Backlog data
 def _load_backlog():
     filename = os.path.join(os.path.dirname(__file__), 'backlog.json')
@@ -70,9 +73,10 @@ def is_word(token):
     
 
 class Featurizer:
+    nlp = NLP
+
     
-    def __init__(self, nlp_model='en'):
-        self.nlp = English()
+    def __init__(self):
         self.parser = mwparser.parser.Parser()
 
 
@@ -219,6 +223,9 @@ class Featurizer:
 
         # Add plaintext for more features
         revision['text'] = plaintext
+        
+        # Add vectors
+        # revision['wordvec_{i}']
 
         return revision
 
