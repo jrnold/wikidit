@@ -71,7 +71,7 @@ def make_edits(page):
              add_per_word(page, 'cite_templates', 1, 5),
              "<a href=\"https://en.wikipedia.org/wiki/Wikipedia:Citing_sources\">Add a citation</a>"),
             ('ref',
-             add_per_word(page, 'ref_per_word', 1, 15),
+             add_per_word(page, 'ref', 1, 15),
              "<a href=\"https://en.wikipedia.org/wiki/Help:Footnotes#Footnotes:_the_basics\">Add a footnote</a>"),
             ('coordinates',
              add_binary(page, 'coordinates'),
