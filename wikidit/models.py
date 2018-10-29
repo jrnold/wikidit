@@ -95,21 +95,21 @@ def make_edits(page):
     return edits
 
 
-def predict_page_edits_api(title, model, featurizer=Featurizer(),
+def predict_page_edits_api(title, model, mapper, featurizer=Featurizer(),
                            session=Session()):
     page = get_page(title, session)
-    return predict_page_edits(featurizer, page['content'], model)
+    return predict_page_edits(page['content'], featurizer, model, mapper)
 
 
 def qual_score(prob):
     return (prob * np.arange(prob.shape[1])).sum()
 
 
-def predict_page_edits(featurizer, content, model):
+def predict_page_edits(content, featurizer, model):
     revision = featurizer.parse_content(content)
+    
     del revision['text']
     revision = pd.DataFrame.from_records([revision])
-    # revision = create_features(revision)
 
     # probabilities for current class
     prob = model.predict_proba(revision)

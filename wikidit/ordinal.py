@@ -97,4 +97,4 @@ class SequentialClassifier(_BaseComposition, ClassifierMixin, TransformerMixin):
         return self
 
     def score(self, X, y):
-        return 1 - (np.mean(np.abs(self.predict(X) - y.codes)) / (self.n_classes_ - 1))
+        return 1 - (np.mean(np.abs(self.predict(X) - y) / (self.n_classes_ - 1)))

@@ -84,7 +84,7 @@ def wiki():
         'title': page['title'],
         'wikipedia_url': wikipedia_url(page['title']),
     }
-    result = predict_page_edits(featurizer, page['content'], MODEL)
+    result = predict_page_edits(page['content'], featurizer, MODEL)
     data['probs'] = reversed([{'prob': round(p * 100), **QA[k]} for k, p in result['prob']])
     data['edits'] = [{'description': Markup(x[1]), 'value': round(x[2] * 100)}
                      for x in result['top_edits'] if x[2] > 0.005]
