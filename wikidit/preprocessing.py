@@ -116,7 +116,8 @@ class Featurizer:
 
         # Sections
         words = [tok for tok in self.nlp(plaintext) if is_word(tok)]
-        word_count = len(words)
+        # always at least one word
+        word_count = len(words) + 1
         # word_count = len(re.findall(PAT_WORD, plaintext))
         # parsed = nlp(plaintext)
         # words = [tok for tok in parsed if not (tok.is_space or tok.is_punct)]
@@ -212,15 +213,6 @@ class Featurizer:
         # is there a map
         revision['coordinates'] = '#coordinates' in str(text).lower()
         
-        # Add normalized versions for many of these
-        for feat in ('headings', 'sub_headings', 'main_templates', 'external_links', 'wikilinks',
-                     'cite_templates', 'templates', 'ref', 'images', 'categories',
-                     'smartlists'):
-            if word_count > 0:
-                revision[f"{feat}_per_word"] = revision[feat] / word_count
-            else:
-                revision[f"{feat}_per_word"] = 0.
-
         # Add plaintext for more features
         revision['text'] = plaintext
         

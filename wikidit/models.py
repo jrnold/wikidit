@@ -6,33 +6,61 @@ import mwapi
 import pandas as pd
 import numpy as np
 
+from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.pipeline import Pipeline
 
 from .mw import match_template, wikilink_title_matches, Session, get_page
 from .preprocessing import Featurizer, WP10_LABELS
 
 
-def add_words(x, i):
-    x = x.copy()
-    x['words'] += i
-    return x
-
-
-def add_per_word(x, col, i, w):
-    x = x.copy()
-    words = x['words']
-    x['words'] += w * i
-    x[col] += i
-    if x['words'] > 0:
-        x[f"{col}_per_word"] = x[col] / x['words']
-    return x
-
+class RevisionPreprocessor(BaseEstimator, TransformerMixin):
+    
+    PER_WORD_COLS = ['headings', 'sub_headings', 'main_templates', 'external_links', 
+                     'wikilinks', 'cite_templates', 'templates', 'ref', 'images', 'categories',
+                     'smartlists']
+    
+    BINARY_COLS = ['coordinates', 'infoboxes']
+    
+    KEEP = ['words',
+             # infobox as a binary
+             'backlog_accuracy',
+             'backlog_content',
+             'backlog_other',
+             'backlog_style',
+             'backlog_links',
+             *PER_WORD_COLS,
+             *(f"{x}_per_word" for x in PER_WORD_COLS),
+             *BINARY_COLS
+           ]
+    
+    def fit(self, X, y=None):
+        return self
+    
+    def transform(self, X, y=None):
+        for feat in self.PER_WORD_COLS:
+            X[f"{feat}_per_word"] = X[feat] / X['words']
+        for feat in self.BINARY_COLS:
+            X[feat] = X[feat].astype(bool).astype(int)
+        return X[self.KEEP]
 
 def add_count(x, col, i):
     x = x.copy()
     x[col] += i
-    if x[col] < 0:
-        x[col] = 0
+    x[col] = max(x[col], 0)
+    return x
+
+
+def add_words(x, i):
+    x = x.copy()
+    x['words'] += i
+    x['words'] = max(x['words'], 1)
+    return x
+
+
+def add_per_word(x, col, i, w):
+    x = add_words(x, w)
+    x[col] += i
+    x[col] = max(x[col], 0)
     return x
 
 
@@ -44,10 +72,10 @@ def add_binary(x, col):
 
 def make_edits(page):
     edits = [('sentence',
-             add_count(page, 'words', 15),
+              add_words(page, 15),
               "Add a sentence (15 words)"),
              ('paragraph',
-              add_count(page, 'words', 150),
+              add_words(page, 150),
                "Add a paragraph (150 words)"),
              ('headings',
               add_per_word(page, 'headings', 1, 2),
@@ -133,41 +161,3 @@ def predict_page_edits(content, featurizer, model):
         'edits': edits,
         'best': WP10_LABELS[best]
     }
-
-
-_COUNT_COLS = ['words',
-             # infobox as a binary
-             'backlog_accuracy',
-             'backlog_content',
-             'backlog_other',
-             'backlog_style',
-             'backlog_links']
-
-_PER_WORD_COLS = [
-             'headings_per_word',
-             'sub_headings_per_word',
-             # links
-             'images_per_word',
-             'categories_per_word',
-             'wikilinks_per_word',
-             'external_links_per_word',
-             # templates
-             'main_templates_per_word',
-             'cite_templates_per_word',
-             'ref_per_word'
-]
-
-_BINARY_COLS = ['coordinates', 'infoboxes']
-
-_RESPONSE_COL = ['wp10']
-
-def create_features(df):
-    """Create features needed for the data frame"""
-    # I do this once rather than multiple times for each data frame
-    df = df.copy()
-    for c in _COUNT_COLS:
-        df[c] = np.sqrt(df[c])
-    for c in _BINARY_COLS:
-        df[c] = df[c].astype(bool)
-    allcols = list(itertools.chain(_PER_WORD_COLS, _COUNT_COLS, _BINARY_COLS))
-    return df.loc[:, allcols]

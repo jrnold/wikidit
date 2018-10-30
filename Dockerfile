@@ -21,12 +21,9 @@ RUN conda install -c conda-forge -y \
         xgboost
 
 RUN pip install \
-    cssselect \
-    importlib_resources \
     mwapi \
     mwparserfromhell \
     mwxml \
-    sklearn-pandas \
     yarl \
     git+https://github.com/jrnold/sklearn-ordinal.git
 
