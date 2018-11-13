@@ -13,18 +13,15 @@ dependencies:
 - matplotlib
 - nb_conda_kernels
 - pandas=0.23.*
-- plotly
 - python=3.6.*
 - python-graphviz
 - scikit-learn>=0.20.*
 - seaborn
 - spacy=2.0.*
-- smart_open
 - tqdm
 - xgboost=0.80.*
 - pip:
   - mwapi
   - mwparserfromhell
   - mwxml
-  - yarl
-  - git+https://github.com/jrnold/sklearn-ordinal.git
+  # conda- "https://github.com/explosion/spacy-models/releases/download/en_core_web_md-1.2.0/en_core_web_md-1.2.0.tar.gz"

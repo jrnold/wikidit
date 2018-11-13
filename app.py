@@ -1,28 +1,18 @@
+"""Flask application."""
+import urllib.parse
+import os.path
+
 from flask import Flask, render_template, request, Markup
 
-import dill
-import urllib.parse
-import numpy as np
-import os.path
-import dill
-
-import plotly.plotly as py
-import plotly.graph_objs as go
-import plotly.offline
-
-import pandas as pd
-
-from wikidit.mw import Session, get_page, get_quality
-from wikidit.models import Featurizer, predict_page_edits
+from wikidit.mw import get_page
+from wikidit.models import Featurizer, predict_page_edits, load_model
 from wikidit.preprocessing import WP10_LABELS
 
 app = Flask(__name__)
 
-# Load instances that should only be loaded once
-MODEL_FILE = os.path.join("models", "xgboost-sequential.pkl")
-with open(MODEL_FILE, "rb") as f:
-    MODEL = dill.load(f)
 
+# Load instances that should only be loaded once
+MODEL = load_model()
 featurizer = Featurizer()
 
 
@@ -34,15 +24,18 @@ def wikipedia_url(title, lang="en", revid=None):
         out = f"https://{lang}.wikipedia.org/w/index.php?title={title}&oldid={revid}"
     return out
 
+
 # Create a single session instance to reuse
 def get_next_quality_cat(cat):
     i = WP10_LABELS.index(cat)
     if i < (len(WP10_LABELS) - 1):
         return WP10_LABELS[i + 1]
 
+
 @app.route('/')
 def index():
     return render_template("index.html")
+
 
 QA = {
     "FA": {"link": "https://en.wikipedia.org/wiki/Wikipedia:Featured_articles",

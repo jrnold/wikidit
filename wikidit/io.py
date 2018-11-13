@@ -27,16 +27,17 @@ def read_labeled_one(filename):
     with gzip.open(filename, "rt") as f:
         for line in f:
             row = json.loads(line)
-            del row['wikitext']
-            del row['text']
+            del row["wikitext"]
+            del row["text"]
             out.append(row)
     return pd.DataFrame.from_records(out)
 
 
 def read_labeled(dirname, n_jobs=6):
     """Read all labeled revisions files and concatenate into a single data frame"""
-    filenames = [os.path.join(dirname, f) for f in os.listdir(dirname)]    
-    revisions = pd.concat(Parallel(n_jobs=6)(delayed(read_labeled_one)(f) 
-                                             for f in filenames))
-    revisions['wp10'] = pd.Series(revisions['wp10'], dtype=WP10_DTYPE)
+    filenames = [os.path.join(dirname, f) for f in os.listdir(dirname)]
+    revisions = pd.concat(
+        Parallel(n_jobs=6)(delayed(read_labeled_one)(f) for f in filenames)
+    )
+    revisions["wp10"] = pd.Series(revisions["wp10"], dtype=WP10_DTYPE)
     return revisions

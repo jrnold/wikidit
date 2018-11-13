@@ -2,32 +2,33 @@
 import gzip
 import argparse
 import json
-from itertools import islice
 import logging
 import os.path
 
 from joblib import Parallel, delayed
-import dill
 
 from ..io import load_ndjson
 from ..preprocessing import Featurizer, WP10_LABELS
 
 logger = logging.getLogger(__name__)
 
+
 def read_labeling_revisions(filename):
     groups = {k: [] for k in WP10_LABELS}
     with gzip.open(filename, "rt") as f:
         for row in load_ndjson(f):
-            groups[row['wp10']].append(row)
+            groups[row["wp10"]].append(row)
     return groups
-            
+
+
 def process(output_dir, wp10, data):
     featurizer = Featurizer()
     filename = os.path.join(output_dir, f"{wp10}.ndjson.gz")
     with gzip.open(filename, "wt") as f:
         for x in data:
-            newx = featurizer.featurize(x, content='wikitext')
+            newx = featurizer.featurize(x, content="wikitext")
             f.write(json.dumps(newx) + "\n")
+
 
 def run(input_file, output_dir, n_jobs=1):
     if os.path.exists(output_dir):
@@ -38,6 +39,7 @@ def run(input_file, output_dir, n_jobs=1):
     data = read_labeling_revisions(input_file)
     exc = Parallel(n_jobs=n_jobs)
     exc(delayed(process)(output_dir, *x) for x in data.items())
+
 
 def main():
     logging.basicConfig()

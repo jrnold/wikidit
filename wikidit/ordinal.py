@@ -9,31 +9,32 @@ from sklearn.utils import Bunch
 import numpy as np
 import pandas as pd
 
+
 def _parallel_fit_estimator(estimator, X, y, cat):
     touse = y >= cat
     y_transform = y > cat
     return estimator.fit(X[touse, :], y_transform[touse])
 
-class SequentialClassifier(_BaseComposition, ClassifierMixin, TransformerMixin):
 
+class SequentialClassifier(_BaseComposition, ClassifierMixin, TransformerMixin):
     def __init__(self, estimator, n_jobs=None, proba_transform=None):
         self.estimator = estimator
         self.n_jobs = n_jobs
         self.proba_transform = proba_transform
 
-    def fit(self, X, y, categories='auto'):
+    def fit(self, X, y, categories="auto"):
         # this is hard-coded for categorical variables
-        if isinstance(y, pd.Series) and hasattr(y, 'cat'):
+        if isinstance(y, pd.Series) and hasattr(y, "cat"):
             y = y.cat.codes
-        
+
         self.n_classes_ = np.max(y) + 1
         categories = list(range(self.n_classes_))
 
         # order of estimators
         self.estimators_ = Parallel(n_jobs=self.n_jobs)(
-                delayed(_parallel_fit_estimator)(clone(self.estimator),
-                                                 X, y, cat)
-                for cat in categories[:-1])
+            delayed(_parallel_fit_estimator)(clone(self.estimator), X, y, cat)
+            for cat in categories[:-1]
+        )
         return self
 
     def predict(self, X):
@@ -82,16 +83,16 @@ class SequentialClassifier(_BaseComposition, ClassifierMixin, TransformerMixin):
         out = super().get_params(deep=deep)
         if not deep:
             return out
-        if hasattr(self.estimator, 'get_params'):
+        if hasattr(self.estimator, "get_params"):
             for key, value in self.estimator.get_params(deep=True).items():
-                out['estimator__%s' % key] = value
+                out["estimator__%s" % key] = value
         return out
 
     def set_params(self, **params):
         # Ensure strict ordering of parameter setting:
         # 1. All steps
-        if 'estimator' in params:
-            setattr(self, 'estimator', params.pop(attr))
+        if "estimator" in params:
+            setattr(self, "estimator", params.pop(attr))
         # 3. Step parameters and other initialisation arguments
         super().set_params(**params)
         return self

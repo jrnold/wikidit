@@ -1,14 +1,11 @@
 import itertools
 import re
 from collections import Counter
-from typing import Generator, Optional
+from typing import Generator, Optional, Dict
 
 from mwxml import Dump, Revision
-import mwparserfromhell as mwparser
 import mwapi
-from mwparserfromhell.wikicode import Wikicode, Wikilink, Template
-
-from sklearn_ordinal import OrdinalClassifier
+from mwparserfromhell.wikicode import Wikicode, Template
 
 
 class Session(mwapi.Session):
@@ -20,28 +17,29 @@ class Session(mwapi.Session):
         super().__init__(self._HOSTNAME, user_agent=self._USER_AGENT)
 
 
-def iter_revisions(dump: Dump, max_pages: Optional[int]=None) -> Generator[Revision, None, None]:
+def iter_revisions(
+    dump: Dump, max_pages: Optional[int] = None
+) -> Generator[Revision, None, None]:
     """Iterate over revisions of Wikipedia dump."""
     for page in itertools.islice(dump.pages, max_pages):
         for rev in page:
             yield rev
 
 
-def revision_to_dict(rev: Revision) -> dict:
+def revision_to_dict(rev: Revision) -> Dict:
     """Convert a revision object to a flattened dict object"""
     rev = rev.to_json()
-    rev['rev_id'] = rev['id']
-    del rev['id']
-    for k in ("id", "title", "namespace", 'redirect'):
+    rev["rev_id"] = rev["id"]
+    del rev["id"]
+    for k in ("id", "title", "namespace", "redirect"):
         if k != "restrictions":
             try:
-                rev[f"page_{k}"] = rev['page'][k]
+                rev[f"page_{k}"] = rev["page"][k]
             except KeyError:
                 rev[f"page_{k}"] = None
         else:
             try:
-                rev[f"page_restrictions"] = " ".join(str(x)
-                    for x in rev['page'][k])
+                rev[f"page_restrictions"] = " ".join(str(x) for x in rev["page"][k])
             except KeyError:
                 rev[f"page_restrictions"] = None
     del rev["page"]
@@ -54,22 +52,20 @@ def revision_to_dict(rev: Revision) -> dict:
         except KeyError:
             rev[f"user_{k}"] = None
     del rev["user"]
-    rev['is_revision'] = 'page_redirect' in rev
-    if 'comment' not in rev:
-        rev['comment'] = ''
+    rev["is_revision"] = "page_redirect" in rev
+    if "comment" not in rev:
+        rev["comment"] = ""
     return rev
 
 
 def template_counts(wikicode: Wikicode) -> Counter:
     """Count unique templates in a wikicode object"""
-    return Counter(str(x.name).strip()
-                   for x in wikicode.ifilter_templates())
+    return Counter(str(x.name).strip() for x in wikicode.ifilter_templates())
 
 
 def wikilinks_counts(wikicode: Wikicode) -> Counter:
     """Count unique wikilinks in a Wikicode object."""
-    return Counter(str(x.title).strip()
-                   for x in wikicode.ifilter_wikilinks())
+    return Counter(str(x.title).strip() for x in wikicode.ifilter_wikilinks())
 
 
 def num_headings(text: str, level: int) -> int:
@@ -77,12 +73,12 @@ def num_headings(text: str, level: int) -> int:
     return len([x for x in text.filter_headings() if x.level == level])
 
 
-def clean_template_name(x: Template):
+def clean_template_name(x: Template) -> str:
     """Return the cleaned and standardized template name"""
     return str(x.name).strip().lower().replace(" ", "_").replace("-", "_")
 
 
-def match_template(x, pattern: str) -> bool:
+def match_template(x: Template, pattern: str) -> bool:
     """Does the object match ``pattern``"""
     return bool(re.match(pattern, clean_template_name(x), re.I))
 
@@ -92,48 +88,57 @@ def wikilink_title_matches(pattern: str, link: str) -> bool:
     return bool(re.match(pattern, str(link.title), re.I))
 
 
-def get_page(title, session=Session()):
-    if title is None or title == '':
+def get_page(title: str, session: Session=Session()):
+    if title is None or title == "":
         return None
-    params = {'action': 'query', 'titles': title, 'prop': "revisions",
-              'redirects': True,
-              'rvprop': 'ids|content|timestamp', "rvslots": "main"}
+    params = {
+        "action": "query",
+        "titles": title,
+        "prop": "revisions",
+        "redirects": True,
+        "rvprop": "ids|content|timestamp",
+        "rvslots": "main",
+    }
     r = session.get(**params)
-    page = list(r['query']['pages'].values())[0]
+    page = list(r["query"]["pages"].values())[0]
     # There is no such page!
-    if 'missing' in page:
+    if "missing" in page:
         return None
-    rev = page['revisions'][0]
-    rev['content'] = rev['slots']['main']['*']
-    del rev['slots']
-    rev['title'] = page['title']
-    rev['pageid'] = page['pageid']
-    rev['talk_page'] = f"Talk:{rev['title']}"
-    rev['quality'] = get_quality(rev['talk_page'], session)
+    rev = page["revisions"][0]
+    rev["content"] = rev["slots"]["main"]["*"]
+    del rev["slots"]
+    rev["title"] = page["title"]
+    rev["pageid"] = page["pageid"]
+    rev["talk_page"] = f"Talk:{rev['title']}"
+    rev["quality"] = get_quality(rev["talk_page"], session)
     return rev
 
 
-def get_content(page):
-    return page['revisions'][0]['slots']['main']['*']
+def get_content(page: Dict) -> str:
+    return page["revisions"][0]["slots"]["main"]["*"]
 
 
-def get_quality(title, session=Session()):
+def get_quality(title: str, session: Session=Session()) -> Optional[str]:
     # norm_title = normalize_title(title, session=session)
-    result = session.get(action='query', titles=title,
-                         prop='categories')
-    categories = list(result['query']['pages'].values())[0]['categories']
+    result = session.get(action="query", titles=title, prop="categories")
+    categories = list(result["query"]["pages"].values())[0]["categories"]
     patterns = [
         ("FA", "FA"),
         ("G?A", "GA"),
         ("B", "B"),
         ("C", "C"),
         ("Start", "Start"),
-        ("Stub", "Stub")
+        ("Stub", "Stub"),
     ]
     qa = None
     for pat, klass in patterns:
-        if len([x['title'] for x in categories
-                if re.match('Category:{}-Class'.format(pat), x['title'])]):
+        if len(
+            [
+                x["title"]
+                for x in categories
+                if re.match("Category:{}-Class".format(pat), x["title"])
+            ]
+        ):
             qa = klass
             break
     return qa

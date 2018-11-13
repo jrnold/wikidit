@@ -1,5 +1,6 @@
 import itertools
 
+
 def split_seq(iterable, size):
     # From https://stackoverflow.com/a/312467/227406
     it = iter(iterable)

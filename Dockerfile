@@ -7,30 +7,15 @@ RUN apt-get update && \
         hunspell
 
 USER jovyan
-# RUN conda update --all
-RUN conda install -c conda-forge -y \
-        flask \
-        gunicorn \
-        joblib \
-        lxml \
-        plotly \
-        scikit-learn>=0.20 \
-        spacy=2.0 \
-        smart_open \
-        tqdm \
-        xgboost
 
-RUN pip install \
-    mwapi \
-    mwparserfromhell \
-    mwxml \
-    yarl \
-    git+https://github.com/jrnold/sklearn-ordinal.git
+COPY environment.yml .
+
+# RUN conda update --all
+RUN conda env update -n base -f "environment.yml" && \
+    conda clean -tipsy && \
+    conda list -n base
 
 RUN python -m spacy download en
 RUN python -m spacy download en_core_web_md
-RUN python -m spacy download en_core_web_lg
-
-EXPOSE 8000
 
 WORKDIR /home/jovyan/work
