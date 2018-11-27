@@ -1,0 +1,51 @@
+\documentclass[crop,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{pgf}
+\usetikzlibrary{arrows,shapes}
+\usepackage{amsmath}
+
+% \usepackage[quiet]{fontspec}
+\usepackage{mathspec}
+\setmainfont{IBM Plex Sans}
+\setsansfont{IBM Plex Sans}
+\setmathfont(Latin)[Uppercase=Regular,Lowercase=Regular]{IBM Plex Sans}
+
+\begin{document}
+
+\begin{tikzpicture}[
+    node distance=4cm,
+  ]
+
+  \tikzstyle{response}=[line width=0pt]
+  \tikzstyle{model}=[rectangle,rounded corners,fill=gray!25]
+  \tikzstyle{decision}=[color=gray,font=\small]
+  \tikzstyle{model edges}=[black,thick,->]
+
+  \node[model](gtstub) at (0, 0) {$p(c > \text{Stub})$};
+  \node[response,right of=gtstub](stub) {$p(c = \text{Stub})$};
+  \node[model,below of=gtstub,node distance=2cm](gtstart) {$p(c > \text{Start} | c > \text{Stub})$};
+  \node[response,right of=gtstart](start) {$p(c = \text{Start})$};
+  \node[model,below of=gtstart,node distance=2cm](gtc) {$p(c > \text{C} | c > \text{Start})$};
+  \node[response,right of=gtc](c) {$p(c = \text{C})$};
+  \node[model,below of=gtc,node distance=2cm](gtb) {$p(c > \text{B} | c > \text{C})$};
+  \node[response,right of=gtb](b) {$p(c = \text{B})$};
+  \node[model,below of=gtb,node distance=2cm](gtga) {$p(c > \text{GA} | c > \text{B})$};
+  \node[response,right of=gtga](ga) {$p(c = \text{GA})$};
+  \node[response,below right of=gtga](fa) {$p(c = \text{FA})$};
+
+  \path
+    (gtstub) edge[model edges] node[right,decision] {Yes} (gtstart)
+    (gtstub) edge[model edges] node[above,decision] {No} (stub)
+    (gtstart) edge[model edges] node[right,decision] {Yes} (gtc)
+    (gtstart) edge[model edges] node[above,decision] {No} (start)
+    (gtc) edge[model edges] node[right,decision] {Yes} (gtb)
+    (gtc) edge[model edges] node[above,decision] {No} (c)
+    (gtb) edge[model edges] node[right,decision] {Yes} (gtga)
+    (gtb) edge[model edges] node[above,decision] {No} (b)
+    (gtga) edge[model edges] node[right,decision] {Yes} (fa)
+    (gtga) edge[model edges] node[above,decision] {No} (ga)
+    ;
+
+\end{tikzpicture}
+
+\end{document}
